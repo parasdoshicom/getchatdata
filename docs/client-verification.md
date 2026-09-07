@@ -24,6 +24,18 @@ Codex CLI 0.153.4 installed ChatData from the public GitHub marketplace. A fresh
 
 The native GitHub update commands were exercised successfully. Final version 1.1.2 was installed and enabled; all 32 published plugin files matched the installed cache byte for byte, and its exact installed doctor passed all three checks. The version 1.1.2 change made Python invocation explicit; the preceding model run had already used that invocation correctly. A separate Codex project-skills runtime also passed on version 1.0.0. During the final native run, harmless checks for absent project metadata and Git state returned errors in the disposable directory; the analytical workflow completed.
 
+## Fresh-session reuse checks on version 1.1.2
+
+Later on September 7, independent checks exercised first-run and fresh-session reuse against the unchanged 1.1.2 package.
+
+Claude Code 2.1.261 with Sonnet loaded all 16 skills through `--plugin-dir`. It ran the doctor and decomposition, saved a proposed local record and raw output, then a separate session read that record, rechecked the source hash and version, and reproduced byte-identical decomposition output. It reported the synthetic and causal limits correctly. Both sessions had no failed tool calls or permission denials. This still does not test marketplace download/install.
+
+Codex CLI 0.153.4 confirmed 1.1.2 installed and enabled from the public GitHub marketplace. A fresh GPT-5.6 Sol session loaded the exact native skills, passed the three setup checks, reproduced 17% to 8%, and saved a proposed record with proof files. A separate read-only session matched the source, helper and version hashes, matched fresh output, and independently recomputed the result with exact fractions. The saved record remained byte-identical. It limited reuse to the synthetic example and method, rather than treating the result as evidence about another dataset.
+
+The Codex analytical flow completed, but the first session was not entirely error-free. The model attempted a Git check in a disposable non-Git folder, repaired one failed patch-context match, and made a malformed search call. None changed the calculation or final record. Unrelated configured integrations also produced startup or shutdown warnings. These checks do not establish an error-free client environment.
+
+The installed Python doctor passed all three checks with operating-system network access denied. Source inspection found no network client code in the local Python helpers. This verifies the local helper behavior; the AI sessions themselves used cloud models and only synthetic input.
+
 ## Cursor: authentication still required
 
 The official Cursor CLI, version 2026.09.02-c22c1a3, was installed for testing. It reports “Not logged in,” so a live model run could not be completed. The project installer and installed setup helper passed; actual skill discovery, instruction following and record creation in Cursor remain unverified.
