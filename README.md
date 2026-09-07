@@ -2,11 +2,27 @@
 
 **Good answers don’t reset. Free forever.**
 
-ChatData gives Claude Code, Codex, and Cursor 16 data science skills: how to frame a question, choose a method, run an analysis, check what could make it wrong, and leave evidence you can rerun.
+ChatData gives Claude Code, Codex, and Cursor 16 data science skills for the work between “I have data” and “I trust this decision.” It helps one data scientist frame the question, choose a method, and run the analysis. It also asks the agent to challenge the conclusion and leave a local record another session can recheck.
 
-For individual data scientists, analysts, and people doing the data work without a specialist beside them. MIT licensed. No ChatData account, trial, license key, hosted service, or paid feature tier. Your AI client, model usage, warehouse, and other tools may still cost money.
+It is MIT licensed and open source. There is no ChatData account, trial, license key, usage meter, or paid feature tier. Your AI client, model usage, warehouse, and other tools may still cost money.
 
-[Website](https://getchatdata.com) · [Skills](#what-you-can-do) · [Runnable examples](plugins/chatdata/references/tools.md) · [Quality checks](docs/evaluation.md)
+[Install](#install) · [Try it on synthetic data](#first-run-get-one-useful-answer) · [Explore all 16 capabilities](docs/capabilities.md) · [Privacy](docs/privacy.md) · [Source](https://github.com/parasdoshicom/getchatdata)
+
+## What changes when ChatData is installed
+
+A general-purpose AI client can write code, query tables, and draw charts. It can also produce a polished answer from the wrong grain or a shifting denominator. Other common failures include an immature cohort, a multiplied join, a leaky model split, and a causal claim the data does not support.
+
+ChatData gives the client a more demanding way to work:
+
+- Start from the decision and inspect the data already supplied.
+- Define the unit, population, denominator, timezone, window, exclusions, and source before calculating a metric.
+- Match the method to the data rather than forcing every question into the same template.
+- Run checks that can withhold a conclusion: assignment imbalance, incomplete follow-up, join multiplication, leakage, failed reconciliation, or missing causal assumptions.
+- Report counts, effect sizes, uncertainty, contrary evidence, and checks that did not run.
+- Save the definition, source version, code, output, caveats, and invalidation conditions in a local analysis record.
+- Point the next session at that record and recheck what changed before reusing the answer.
+
+The goal is to make one data scientist more capable and harder to fool. We do not claim a measured 10× productivity result or guaranteed model accuracy. The value is inspectable in the methods, runnable checks, and artifacts the agent leaves behind.
 
 ## Install
 
@@ -19,9 +35,17 @@ claude plugin marketplace add parasdoshicom/getchatdata
 claude plugin install chatdata@chatdata-free
 ```
 
-Restart Claude Code, then run `/chatdata:status` or `/chatdata:data-science`. Ask, for example: `/chatdata:experiment-analysis Check whether this A/B result is trustworthy.`
+Restart Claude Code, then run `/chatdata:status` or `/chatdata:data-science`.
 
-The plugin uses the ChatData name, command namespace, and a startup context hook. It does not replace your status line, change permissions, or overwrite other plugins. If you already have the older hosted ChatData plugin, use one version in a session to avoid the shared `/chatdata:` namespace. Disable the old plugin in that project's settings if you choose the free one; no hosted account is needed for this package.
+Try a focused skill directly:
+
+```text
+/chatdata:experiment-analysis Check whether this A/B result is trustworthy.
+```
+
+The plugin uses the ChatData name, command namespace, and a startup context hook. The hook reports the installed version and how to start. It does not read your data, change permissions, replace your status line, or overwrite other plugins.
+
+If another installed ChatData package uses the same `/chatdata:` namespace, enable one version for a session so the client does not select the wrong skill root. You do not need a separate ChatData account for this package.
 
 ### Codex
 
@@ -32,7 +56,9 @@ codex plugin marketplace add parasdoshicom/getchatdata --ref main
 codex plugin add chatdata@chatdata-free
 ```
 
-Start a new task, select ChatData’s **data-science** skill, and use the first-run prompt below. Native plugins work in Codex desktop and CLI; the IDE extension should use the project skills installer. If your Codex version does not offer plugin commands, use the project skills installer below with `--client codex`; it installs into `.agents/skills/`.
+Start a new task, select ChatData’s **data-science** skill, and use the first-run prompt below. Native plugins work in Codex desktop and CLI. For a project-scoped install, use the installer below with `--client codex`; it writes the skills into `.agents/skills/`.
+
+If your Codex version does not offer plugin commands, the project-scoped installer provides the same skill content and local helpers.
 
 ### Cursor
 
@@ -43,50 +69,161 @@ git clone https://github.com/parasdoshicom/getchatdata.git
 python3 getchatdata/scripts/install.py --client cursor --project /absolute/path/to/your-project
 ```
 
-Replace the project path with your existing data project. Start a new Cursor agent chat in that project, select `/chatdata-data-science`, and use the first-run prompt below. The installer puts the same skills and helpers in `.cursor/skills/chatdata-*`. Cursor loads these as native skills; this does not claim a listing in Cursor's marketplace.
+Replace the project path with your existing data project. Start a new Cursor agent chat in that project, select `/chatdata-data-science`, and use the first-run prompt below. The installer puts the skills and helpers in `.cursor/skills/chatdata-*`.
 
-To check the installed helpers without asking the AI, run:
+Check the installed local helpers without asking the AI:
 
 ```sh
 python3 "/absolute/path/to/your-project/.cursor/skills/chatdata-data-science/scripts/doctor.py"
 ```
 
-This should report three passing synthetic checks. Skill discovery and a real agent response are separate checks; follow the first-run guide to verify those.
+It should report three passing synthetic checks. That proves the local helper installation works. Skill discovery and a real agent response are separate checks; the first-run workflow covers those.
 
-The installer preserves existing files and refuses to overwrite an installed ChatData skill unless you request `--update`. Updates move the old ChatData folders, including local edits, into the printed `chatdata-backups/` directory before installing the new copy. Review and reapply any customizations you want to keep. Unrelated skills are preserved. If an update fails, the installer restores the prior folders. To uninstall, remove only the `chatdata-*` folders it created; keep backups until you no longer need them. For native plugins, use the client's plugin manager.
+### Project-scoped Codex install
+
+Clone the public repository, then run:
+
+```sh
+python3 getchatdata/scripts/install.py --client codex --project /absolute/path/to/your-project
+```
+
+The installer writes the skills into `.agents/skills/chatdata-*`. It preserves unrelated skills and refuses to overwrite existing ChatData folders unless you pass `--update`.
+
+On update, the installer moves the old ChatData folders, including local edits, into the printed `chatdata-backups/` directory before installing the new copy. Review and reapply any customization you want to keep. If installation fails after the backup begins, the installer restores the prior folders.
 
 ## First run: get one useful answer
 
-After installation, start a fresh agent session. Select `/chatdata:data-science` in Claude Code, ChatData’s **data-science** skill in Codex, or `/chatdata-data-science` in Cursor. Then paste:
+Start a fresh agent session after installation. Select `/chatdata:data-science` in Claude Code, ChatData’s **data-science** skill in Codex, or `/chatdata-data-science` in Cursor. Paste this prompt:
 
 > Use ChatData to check setup, then analyze its bundled mix-shift example. Run the calculation, explain what changed, and save a reusable analysis record in analysis/chatdata-first-run/. Use only the synthetic example; do not connect to my data.
 
-You should see the installed version and three local checks: a 17% → 8% rate change explained by mix, an ordered 3 → 2 → 1 funnel, and an experiment winner withheld because assignment is imbalanced. The agent should then explain the mix result and give you a saved record with the command, evidence and caveats. These are synthetic examples, not your business results.
+You should get four concrete results:
 
-In the next session, ask:
+1. The setup doctor reports the installed ChatData version.
+2. Three synthetic checks pass:
+   - conversion falls from 17% to 8%, with the full 9 percentage-point decline explained by customer mix;
+   - an ordered funnel contains 3 visits, 2 signups, and 1 purchase after an immature user and duplicate event are handled;
+   - an apparent experiment lift from 10% to 20% is withheld because assignment counts conflict with the planned allocation.
+3. The agent explains the mix result without calling arithmetic attribution a causal explanation.
+4. A proposed local record contains the question, definition, exact command, source hash, result, checks, and caveats.
 
-> Read analysis/chatdata-first-run/ before continuing. Check whether the inputs or assumptions changed, then tell me what is safe to reuse.
+The package labels these examples as synthetic. Their results make no claim about your business.
 
-The [first-run guide](plugins/chatdata/references/first-run.md) explains the expected behavior. Records stay where you choose to save them; this is not automatic cross-client memory.
+In the next session, paste:
 
-To check the helpers directly from a source checkout:
+> Read analysis/chatdata-first-run/ before continuing. Explain the saved definition and result, check whether the inputs or assumptions changed, then tell me what is safe to reuse.
+
+The [full first-run guide](plugins/chatdata/references/first-run.md) explains the expected output and common failure cases. The record stays in the folder you chose. ChatData does not synchronize it between clients or silently upload it.
+
+Run the doctor directly from a source checkout at any time:
 
 ```sh
 python3 plugins/chatdata/scripts/doctor.py
 ```
 
-The doctor makes no network requests or file writes. It does not verify AI client discovery or a warehouse connection. Python 3.9+ is required. Native Claude's startup hook also uses Node.js.
+The doctor uses Python 3.9+ standard-library code, makes no network requests, and writes no files. It does not verify the AI client's skill discovery or a live data connection. The native Claude Code startup hook also uses Node.js.
+
+## Sixteen skills for the analysis work you already do
+
+| Skill | Use it when | What it asks the agent to check |
+| --- | --- | --- |
+| [data-science](plugins/chatdata/skills/data-science/SKILL.md) | You have a question or dataset and need the right workflow | Decision, available evidence, cost of error, method choice, completed calculation, reusable record |
+| [metric-definition](plugins/chatdata/skills/metric-definition/SKILL.md) | A KPI, cohort, denominator, or source of truth is ambiguous | Unit, numerator, denominator, population, exclusions, timezone, window, source, boundary cases |
+| [experiment-design](plugins/chatdata/skills/experiment-design/SKILL.md) | You are planning or vetting an A/B test | Smallest useful effect, power, randomization, exposure, guardrails, maturity, stopping rule |
+| [experiment-analysis](plugins/chatdata/skills/experiment-analysis/SKILL.md) | Someone wants to call an experiment winner | Assignment balance, exposure, effect size, uncertainty, maturity, attrition, leakage, guardrails |
+| [funnel-analysis](plugins/chatdata/skills/funnel-analysis/SKILL.md) | You need ordered conversion and drop-off | Identity, event order, duplicates, mature windows, adjacent and end-to-end conversion |
+| [root-cause](plugins/chatdata/skills/root-cause/SKILL.md) | A metric changed and you need to locate the movement | Measurement breaks, comparable periods, mix versus within-segment change, reconciliation, contrary evidence |
+| [retention](plugins/chatdata/skills/retention/SKILL.md) | You need cohort retention, churn, repeat purchase, or survival | Cohort age, at-risk denominator, incomplete follow-up, resurrection, censoring, coverage changes |
+| [data-quality](plugins/chatdata/skills/data-quality/SKILL.md) | You need to know whether data is usable for one decision | Grain, keys, missingness, ranges, drift, referential integrity, join multiplication, impact of each issue |
+| [sql-review](plugins/chatdata/skills/sql-review/SKILL.md) | You are writing or reviewing analytical SQL | Grain, joins, NULLs, deduplication, ratio math, time boundaries, windows, cost, fixture reconciliation |
+| [exploratory-analysis](plugins/chatdata/skills/exploratory-analysis/SKILL.md) | A dataset is unfamiliar and you need useful questions | Collection, coverage, distributions, outliers, comparisons tried, confounding, leakage, follow-up tests |
+| [forecasting](plugins/chatdata/skills/forecasting/SKILL.md) | You need a dated forecast for a decision | Temporal holdout, naive baselines, rolling backtests, future-feature availability, interval coverage |
+| [predictive-modeling](plugins/chatdata/skills/predictive-modeling/SKILL.md) | You need to predict an outcome at a defined moment | Leakage-safe split, baseline, threshold, calibration, subgroup errors, shift, intended use |
+| [causal-inference](plugins/chatdata/skills/causal-inference/SKILL.md) | Someone asks whether an intervention caused an outcome | Estimand, causal structure, identification assumptions, diagnostics, placebos, sensitivity |
+| [visualization](plugins/chatdata/skills/visualization/SKILL.md) | A checked result needs a chart or dashboard | Decision-focused encoding, denominators, uncertainty, source, value verification, rendered output |
+| [decision-brief](plugins/chatdata/skills/decision-brief/SKILL.md) | Analysis needs to become a decision | Recommendation, evidence, contrary case, alternatives, uncertainty, next result that changes the action |
+| [analysis-review](plugins/chatdata/skills/analysis-review/SKILL.md) | An analysis needs an independent challenge | Recalculation, grain, joins, assumptions, sensitivity, leakage, unsupported claims, fix and retest |
+
+The [capabilities guide](docs/capabilities.md) goes much deeper. It gives every skill a copyable prompt, required inputs, expected output, checks, runnable helper where available, and method limits.
+
+## Things to try next
+
+Bring one CSV, one query, or one experiment readout. Tell the agent what decision the answer should change. These prompts are intentionally specific enough to produce inspectable work.
+
+### Challenge an experiment result
+
+> Use ChatData’s experiment-analysis skill. Planned allocation was 50/50 and the smallest useful absolute effect was 1 percentage point. Inspect the assignment counts, exposure counts, outcomes, exclusions, horizon, and guardrails in results.csv. Check sample-ratio mismatch, maturity, effect size, uncertainty, and practical significance. Do not call a winner if the design evidence is missing.
+
+### Find a funnel drop-off without counting events out of order
+
+> Use ChatData’s funnel-analysis skill. Build a closed user-level funnel from visit to signup to purchase with a 7-day window in UTC. Check duplicate events, strict ordering, identity gaps, late data, and immature entry cohorts. Show counts, adjacent-step conversion, end-to-end conversion, and the next diagnostic query.
+
+### Explain a metric change before guessing at causes
+
+> Use ChatData’s root-cause skill. Reproduce conversion for the before and after periods from the same definition and source. Rule out partial periods, delayed data, event changes, and duplicate joins. Decompose the change by acquisition channel into mix and within-channel performance. Reconcile it to the headline change and give me the strongest evidence against the leading explanation.
+
+### Review SQL that looks plausible
+
+> Use ChatData’s sql-review skill. State the source and result grain, then review this query for join multiplication, NULL behavior, ratio math, time boundaries, timezone, window frames, and future leakage. Test duplicates, NULLs, boundary timestamps, empty groups, and one-to-many joins. Reconcile one independent total and say whether the query was actually run.
+
+### Try to break an analysis before acting
+
+> Use ChatData’s analysis-review skill. Read the actual inputs, code, output, definition, and saved record. Recompute one decision-critical result. Check grain, denominator, maturity, freshness, joins, missingness, selection, multiplicity, assumptions, leakage, and causal language. Test one plausible boundary case and one sensitivity that could reverse the decision. Fix and retest local defects, then return supported, supported with limitations, or not supported.
+
+There are copyable prompts for all 16 skills in [docs/capabilities.md](docs/capabilities.md).
+
+## Built-in runnable checks
+
+ChatData includes five deterministic calculations. They are small enough to inspect and use only the Python standard library.
+
+| Helper | What it does | What it refuses to hide |
+| --- | --- | --- |
+| Binary experiment | Rates, absolute and relative lift, uncertainty, assignment-balance check | An apparent winner with sample-ratio mismatch |
+| Approximate power | Per-arm sample size for a binary outcome | Baseline, absolute effect, alpha, power, and equal-allocation assumptions |
+| Ordered funnel | Closed user-level conversion from timestamped events | Duplicates, out-of-order steps, future events, and immature windows |
+| Rate decomposition | Mix and within-segment contributions to a rate change | Non-reconciling totals, duplicate segments, and undefined segment rates |
+| CSV profile | Rows, columns, missing values, duplicate rows, and duplicate keys | The difference between structural checks and business validity |
+
+See [the exact commands, inputs, outputs, formulas, and method sources](plugins/chatdata/references/tools.md).
+
+Other skills guide the client in using the Python, SQL, notebook, visualization, and authorized data tools already available in your environment. ChatData does not include a database connector, managed compute service, automatic experiment launcher, or model host.
+
+## Keep useful work for the next session
+
+For a result worth reusing, ask the agent to save a local [analysis record](plugins/chatdata/references/analysis-record.md). A good record includes:
+
+- the question and decision;
+- the metric definition and boundary rules;
+- source and observation cutoff;
+- local input hash or source version;
+- exact query, command, parameters, dependencies, and seed;
+- result, units, effect size, and uncertainty;
+- expected and actual checks, including failures and checks not run;
+- evidence against the conclusion;
+- limitations and unresolved questions;
+- what would change the decision;
+- freshness and definition conditions to recheck next time.
+
+A record starts as **proposed**. It becomes **reviewed by user** only when a person actually reviews it. A later session should never reuse the answer blindly; it should recheck the source, cutoff, definition, and assumptions first.
+
+## Privacy
+
+The project installer, setup doctor, analytical helper, and Claude Code discovery hook contain no ChatData telemetry. The doctor makes no network requests or file writes. The helper reads only the path supplied to it and prints its result locally.
+
+Your AI client may still send prompts, selected files, and tool output to its model provider. Connected warehouses and other tools have their own policies. Installing or updating from this repository contacts GitHub. Visiting the website contacts its host. “The helper runs locally” does not mean a cloud AI model keeps everything on-device.
+
+Read [the privacy notice](docs/privacy.md) before using private, personal, regulated, or customer data. Keep credentials, raw private data, and analysis records out of public issues and commits.
 
 ## Updates
 
-The Codex installation above tracks this GitHub repository's `main` branch, rather than a development folder on your machine. To fetch the current release and reinstall it:
+The native Codex installation tracks this repository's `main` branch. Updating remains an explicit action:
 
 ```sh
 codex plugin marketplace upgrade chatdata-free
 codex plugin add chatdata@chatdata-free
 ```
 
-Start a new task and rerun the setup prompt to confirm the installed version. This is an explicit update workflow; ChatData does not add a background updater or promise that your client automatically polls GitHub.
+Start a new task and rerun the setup prompt to confirm the installed version. ChatData does not run a background updater or promise that your client polls GitHub automatically.
 
 For Claude Code:
 
@@ -97,69 +234,36 @@ claude plugin update chatdata@chatdata-free
 
 Restart Claude Code and run `/chatdata:status`.
 
-For Cursor or a Codex project skills install, run these from your clean source checkout:
+For Cursor or a project-scoped Codex install, run these commands from a clean source checkout:
 
 ```sh
 git pull --ff-only
 python3 scripts/install.py --client cursor --project /absolute/path/to/your-project --update
 ```
 
-Use `--client codex` for `.agents/skills/`. If Git reports local changes or a conflict, inspect them before updating; do not discard your edits. Start a new chat after the update.
+Use `--client codex` for `.agents/skills/`. If Git reports local changes or a conflict, inspect them before updating. Do not discard your edits. Start a new chat after the update.
 
 ## If setup stops
 
 | What you see | Next step |
 | --- | --- |
-| `codex`, `claude`, `git`, or `python3` is not found | Install or open the required client/tool first. ChatData does not bundle the AI client. |
-| Plugin commands are unavailable in Codex | Update the client, or use `scripts/install.py --client codex` for your project. |
-| Skills do not appear | Start a new session in the project you installed into, then select the ChatData skill explicitly. Check that the plugin is enabled in your client's plugin manager. |
-| Existing ChatData folders | Use `--update` to back them up and replace them. The installer leaves unrelated skills alone. |
-| The agent asks to run a local command | Review the exact command and grant only the permission needed for that command. Do not disable your client's safeguards. |
-| The doctor fails | Keep the error, check Python 3.9+ and the installed version, refresh the package, then retry. Do not treat a failed check as a successful setup. |
-| Another marketplace is broken | A broad marketplace listing may fail for an unrelated source. Try the exact `chatdata@chatdata-free` install command first; do not remove other plugins to fix ChatData. |
-| The AI client requires a login or subscription | Use that client's sign-in. There is no separate ChatData account. |
+| `codex`, `claude`, `git`, or `python3` is not found | Install or open the required client or tool. ChatData does not bundle it. |
+| Plugin commands are unavailable in Codex | Update the client, or use `scripts/install.py --client codex` for a project-scoped install. |
+| Skills do not appear | Start a new session in the project you installed into. Select the ChatData skill explicitly and check that the package is enabled. |
+| Existing ChatData folders | Use `--update` to back them up and replace them. Unrelated skills remain in place. |
+| The agent asks to run a local command | Review the exact command and grant only the permission it needs. Do not disable the client's safeguards. |
+| The doctor fails | Keep the error, check Python 3.9+ and the installed version, refresh the package, then retry. A failed doctor is not a successful setup. |
+| Another marketplace source is broken | Try the exact `chatdata@chatdata-free` install command first. Do not remove unrelated plugins to fix ChatData. |
+| The AI client requires a login or subscription | Use that client's sign-in. ChatData has no separate account. |
 
-## What you can do
+## Evidence and limits
 
-| Skill | Use it to |
-| --- | --- |
-| [data-science](plugins/chatdata/skills/data-science/SKILL.md) | Choose and carry out a data science workflow for a question, dataset, or decision. |
-| [metric-definition](plugins/chatdata/skills/metric-definition/SKILL.md) | Define a KPI, denominator, cohort, or source of truth before calculating a business metric. |
-| [experiment-design](plugins/chatdata/skills/experiment-design/SKILL.md) | Design or vet an A/B test, including power, randomization, guardrails, and stopping rules. |
-| [experiment-analysis](plugins/chatdata/skills/experiment-analysis/SKILL.md) | Analyze an A/B test or vet a claimed winner using assignment checks, uncertainty, and practical effect. |
-| [funnel-analysis](plugins/chatdata/skills/funnel-analysis/SKILL.md) | Measure ordered conversion steps, drop-off, and time to convert from event data. |
-| [root-cause](plugins/chatdata/skills/root-cause/SKILL.md) | Investigate why a metric changed and separate measurement, composition, and within-segment effects. |
-| [retention](plugins/chatdata/skills/retention/SKILL.md) | Build mature cohort retention, churn, repeat-purchase, or survival analyses. |
-| [data-quality](plugins/chatdata/skills/data-quality/SKILL.md) | Assess whether a dataset is fit for a named analysis, including grain, missingness, joins, and freshness. |
-| [sql-review](plugins/chatdata/skills/sql-review/SKILL.md) | Review or write analytical SQL with grain, joins, time boundaries, and metric reconciliation. |
-| [exploratory-analysis](plugins/chatdata/skills/exploratory-analysis/SKILL.md) | Explore an unfamiliar dataset and identify useful, testable questions without overstating patterns. |
-| [forecasting](plugins/chatdata/skills/forecasting/SKILL.md) | Forecast time series with backtesting, simple baselines, uncertainty, and leakage checks. |
-| [predictive-modeling](plugins/chatdata/skills/predictive-modeling/SKILL.md) | Build or evaluate a predictive model with leakage-safe splits, baselines, calibration, and error analysis. |
-| [causal-inference](plugins/chatdata/skills/causal-inference/SKILL.md) | Assess causal claims or design observational estimates with explicit assumptions and falsification checks. |
-| [visualization](plugins/chatdata/skills/visualization/SKILL.md) | Create analytical charts or dashboards that show the decision, denominators, uncertainty, and sources. |
-| [decision-brief](plugins/chatdata/skills/decision-brief/SKILL.md) | Turn analysis into a concise decision brief with evidence, tradeoffs, and a measurable next step. |
-| [analysis-review](plugins/chatdata/skills/analysis-review/SKILL.md) | Independently scrutinize an analysis for arithmetic, methodology, evidence, and unsupported claims. |
+The release has package validation, unit tests for the helper calculations, installer rollback tests, local link checks, synthetic first-run cases, and recorded client verification. The [evaluation guide](docs/evaluation.md) separates deterministic software checks from the harder question of model behavior.
 
-## What this adds to a general-purpose AI client
+These skills and checks improve the process an agent follows. They do not guarantee that a model will never make a mistake. They do not prove live data access, unattended operation, automatic memory, or superiority over another product. Inspect the evidence, run a relevant check, preserve the limits, and make the result reproducible.
 
-Your client can already write code, query data, and make charts. ChatData supplies a consistent method for the decisions around that work: which denominator belongs in the question, when an experiment is not ready to call, whether cohort age explains a drop, and what would disprove the leading explanation.
-
-The release includes five runnable checks for binary experiments, sample size, ordered funnels, rate decomposition, and CSV quality. Other skills guide the client in using the Python, SQL, charting libraries, and authorized data tools available in your environment. There is no bundled warehouse connector or automatic experiment-launch service.
-
-For work worth reusing, keep the definition, inputs, exact calculation, checks, and caveats in a local [analysis record](plugins/chatdata/references/analysis-record.md). Recheck them when data or assumptions change. These are instructions and tools, not a guarantee that an AI model will never make a mistake.
-
-We do not claim a measured 10× improvement or superiority over another tool. [The evaluation page](docs/evaluation.md) separates executable checks from model-quality evaluation and publishes the failure cases we expect a reviewer to test.
-
-## Privacy
-
-The bundled installer and analytical helpers make no network requests and have no ChatData telemetry. Plugin installation fetches this public repository. Skills operate through your chosen AI client and the tools you authorize; those providers' data policies and charges still apply. Do not put credentials, customer data, or private analysis records in a public issue or commit.
-
-## For your whole team
-
-The individual plugin stays free. If you want help applying these methods across your team, [contact Paras about ChatData advisory](mailto:support@getchatdata.com?subject=ChatData%20team%20advisory). Advisory is a separate service for shared AI infrastructure: definitions, reusable context, workflow design, and evaluating whether agents use that context correctly. You do not need to buy advisory to use any skill.
+For tested client versions, actual workflow results, and remaining limits, see [client verification](docs/client-verification.md).
 
 ## Contribute
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep client-specific packaging separate from shared analytical behavior. [MIT license](LICENSE).
-
-For the tested client versions, actual workflow results and remaining limits, see [client verification](docs/client-verification.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep the release free of accounts, license checks, telemetry, and paid-feature dependencies. [MIT license](LICENSE).
