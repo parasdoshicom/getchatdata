@@ -1,0 +1,17 @@
+{
+  "name": "chatdata-free",
+  "owner": {
+    "name": "Paras Doshi"
+  },
+  "plugins": [
+    {
+      "name": "chatdata",
+      "source": "./plugins/chatdata",
+      "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
+      "version": "1.0.0"
+    }
+  ],
+  "metadata": {
+    "description": "Free, open-source ChatData skills for individual data work."
+  }
+}

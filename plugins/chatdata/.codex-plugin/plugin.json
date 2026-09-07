@@ -1,0 +1,29 @@
+{
+  "name": "chatdata",
+  "version": "1.0.0",
+  "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
+  "author": {
+    "name": "Paras Doshi",
+    "url": "https://github.com/parasdoshicom"
+  },
+  "homepage": "https://getchatdata.com",
+  "repository": "https://github.com/parasdoshicom/getchatdata",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ChatData",
+    "shortDescription": "Free data science skills with reproducible checks",
+    "brandColor": "#D4F547",
+    "defaultPrompt": [
+      "Use ChatData to investigate a metric change.",
+      "Use ChatData to vet this experiment."
+    ],
+    "longDescription": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
+    "developerName": "Paras Doshi",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ]
+  }
+}

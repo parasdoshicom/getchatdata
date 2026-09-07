@@ -1,0 +1,20 @@
+{
+  "name": "chatdata-free",
+  "interface": {
+    "displayName": "Chatdata Free"
+  },
+  "plugins": [
+    {
+      "name": "chatdata",
+      "source": {
+        "source": "local",
+        "path": "./plugins/chatdata"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "chatdata",
+  "version": "1.0.0",
+  "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
+  "author": {
+    "name": "Paras Doshi",
+    "url": "https://github.com/parasdoshicom"
+  },
+  "homepage": "https://getchatdata.com",
+  "repository": "https://github.com/parasdoshicom/getchatdata",
+  "license": "MIT"
+}

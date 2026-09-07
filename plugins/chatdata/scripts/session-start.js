@@ -1,0 +1,2 @@
+// Branding and discovery only. No settings edits, network calls, or data access.
+process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:"ChatData 1.0.0 is available: free, open-source data science skills. Use /chatdata:data-science for routing or /chatdata:status for setup. Read the relevant SKILL.md before analysis. ChatData needs no account; your AI client and data tools may have their own costs."}}));

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "data-science",
+    "description": "Choose and carry out a data science workflow for a question, dataset, or decision."
+  },
+  {
+    "name": "metric-definition",
+    "description": "Define a KPI, denominator, cohort, or source of truth before calculating a business metric."
+  },
+  {
+    "name": "experiment-design",
+    "description": "Design or vet an A/B test, including power, randomization, guardrails, and stopping rules."
+  },
+  {
+    "name": "experiment-analysis",
+    "description": "Analyze an A/B test or vet a claimed winner using assignment checks, uncertainty, and practical effect."
+  },
+  {
+    "name": "funnel-analysis",
+    "description": "Measure ordered conversion steps, drop-off, and time to convert from event data."
+  },
+  {
+    "name": "root-cause",
+    "description": "Investigate why a metric changed and separate measurement, composition, and within-segment effects."
+  },
+  {
+    "name": "retention",
+    "description": "Build mature cohort retention, churn, repeat-purchase, or survival analyses."
+  },
+  {
+    "name": "data-quality",
+    "description": "Assess whether a dataset is fit for a named analysis, including grain, missingness, joins, and freshness."
+  },
+  {
+    "name": "sql-review",
+    "description": "Review or write analytical SQL with grain, joins, time boundaries, and metric reconciliation."
+  },
+  {
+    "name": "exploratory-analysis",
+    "description": "Explore an unfamiliar dataset and identify useful, testable questions without overstating patterns."
+  },
+  {
+    "name": "forecasting",
+    "description": "Forecast time series with backtesting, simple baselines, uncertainty, and leakage checks."
+  },
+  {
+    "name": "predictive-modeling",
+    "description": "Build or evaluate a predictive model with leakage-safe splits, baselines, calibration, and error analysis."
+  },
+  {
+    "name": "causal-inference",
+    "description": "Assess causal claims or design observational estimates with explicit assumptions and falsification checks."
+  },
+  {
+    "name": "visualization",
+    "description": "Create analytical charts or dashboards that show the decision, denominators, uncertainty, and sources."
+  },
+  {
+    "name": "decision-brief",
+    "description": "Turn analysis into a concise decision brief with evidence, tradeoffs, and a measurable next step."
+  },
+  {
+    "name": "analysis-review",
+    "description": "Independently scrutinize an analysis for arithmetic, methodology, evidence, and unsupported claims."
+  }
+]
