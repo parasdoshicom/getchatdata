@@ -242,7 +242,7 @@ def main():
         elif command=='funnel': result=funnel(data,**args)
         elif command=='decompose': result=decompose(data)
         else: result=profile(fields,data,**args)
-        result['provenance']={'tool':'ChatData 1.0.0','arguments':sys.argv[1:]}
+        result['provenance']={'tool':'ChatData '+json.loads(Path(__file__).with_name('package-info.json').read_text())['version'],'arguments':sys.argv[1:]}
         if source:
             result['provenance']['input_sha256']=hashlib.sha256(Path(source).read_bytes()).hexdigest()
         print(json.dumps(result,indent=2,allow_nan=False))

@@ -1,11 +1,13 @@
 ---
 name: data-science
-description: Choose and carry out a data science workflow for a question, dataset, or decision.
+description: Set up ChatData, verify its local examples, or choose and carry out a data science workflow for a question, dataset, or decision.
 ---
 
 # Start with the decision
 
 Read [the working agreement](../../references/working-agreement.md) when using this skill. It defines source, privacy, execution, and evidence boundaries.
+
+For installation, setup checks, or a first run without customer data, read [the first-run guide](../../references/first-run.md). Run `../../scripts/doctor.py` when asked to verify setup. It runs three synthetic checks without network access or file writes. Explain its scope honestly: local helpers passed, while client discovery and live data are separate checks. If asked to try an analysis, continue through the example and save a usable record; a diagnostic printout alone is not the first analysis.
 
 Identify the decision, the available data, and the cost of a wrong answer. If the user is unsure, offer one concrete starting question and explain what its answer would change. Ask only for missing details that change the method; inspect provided files first.
 

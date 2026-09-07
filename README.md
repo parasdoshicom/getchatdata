@@ -1,6 +1,6 @@
 # ChatData
 
-**Better data work, in the AI tools you already use. Free forever.**
+**Good answers don’t reset. Free forever.**
 
 ChatData gives Claude Code, Codex, and Cursor 16 data science skills: how to frame a question, choose a method, run an analysis, check what could make it wrong, and leave evidence you can rerun.
 
@@ -28,11 +28,11 @@ The plugin uses the ChatData name, command namespace, and a startup context hook
 Run in your terminal:
 
 ```sh
-codex plugin marketplace add parasdoshicom/getchatdata
+codex plugin marketplace add parasdoshicom/getchatdata --ref main
 codex plugin add chatdata@chatdata-free
 ```
 
-Start a new task and ask: “Use ChatData to investigate why conversion changed.” You can select the relevant skill explicitly in Codex. If your Codex version does not offer plugin commands, use the project skills installer below with `--client codex`; it installs into `.agents/skills/`.
+Start a new task and ask: “Use ChatData to check setup and run its synthetic examples.” Select ChatData’s data-science skill if it is not picked automatically. Native plugins work in Codex desktop and CLI; the IDE extension should use the project skills installer. If your Codex version does not offer plugin commands, use the project skills installer below with `--client codex`; it installs into `.agents/skills/`.
 
 ### Cursor
 
@@ -45,19 +45,71 @@ python3 getchatdata/scripts/install.py --client cursor --project /absolute/path/
 
 Replace the project path with your existing data project. Start a new Cursor agent chat and ask: “Use ChatData to analyze this funnel.” The installer puts the same skills and helpers in `.cursor/skills/chatdata-*`. Cursor loads these as native skills; this does not claim a listing in Cursor's marketplace.
 
-The installer preserves existing files and refuses to overwrite an installed ChatData skill. For an update, inspect the diff, move the prior `chatdata-*` folders to a backup, and run it again. To uninstall a project skills install, remove only the `chatdata-*` folders it created. For native plugins, use the client's plugin manager.
+The installer preserves existing files and refuses to overwrite an installed ChatData skill unless you request `--update`. Updates move the old ChatData folders, including local edits, into the printed `chatdata-backups/` directory before installing the new copy. Review and reapply any customizations you want to keep. Unrelated skills are preserved. If an update fails, the installer restores the prior folders. To uninstall, remove only the `chatdata-*` folders it created; keep backups until you no longer need them. For native plugins, use the client's plugin manager.
 
-## Try it without connecting any data
+## First run: get one useful answer
+
+After installation, start a fresh agent session and paste:
+
+> Use ChatData to check setup, then analyze its bundled mix-shift example. Run the calculation, explain what changed, and save a reusable analysis record in analysis/chatdata-first-run/. Use only the synthetic example; do not connect to my data.
+
+You should see the installed version and three local checks: a 17% → 8% rate change explained by mix, an ordered 3 → 2 → 1 funnel, and an experiment winner withheld because assignment is imbalanced. The agent should then explain the mix result and give you a saved record with the command, evidence and caveats. These are synthetic examples, not your business results.
+
+In the next session, ask:
+
+> Read analysis/chatdata-first-run/ before continuing. Check whether the inputs or assumptions changed, then tell me what is safe to reuse.
+
+The [first-run guide](plugins/chatdata/references/first-run.md) explains the expected behavior. Records stay where you choose to save them; this is not automatic cross-client memory.
+
+To check the helpers directly from a source checkout:
 
 ```sh
-git clone https://github.com/parasdoshicom/getchatdata.git
-cd getchatdata
-python3 plugins/chatdata/scripts/analyze.py decompose plugins/chatdata/examples/mix-shift.csv
-python3 plugins/chatdata/scripts/analyze.py funnel plugins/chatdata/examples/funnel.csv --steps visit signup purchase --as-of 2026-01-05T00:00:00Z --window-hours 48
-python3 -m unittest discover -s tests -v
+python3 plugins/chatdata/scripts/doctor.py
 ```
 
-These synthetic examples show two easy mistakes: blaming performance when the mix changed, and counting a purchase that happened before signup. Expected results and experiment examples are in [the tools guide](plugins/chatdata/references/tools.md).
+The doctor makes no network requests or file writes. It does not verify AI client discovery or a warehouse connection. Python 3.9+ is required. Native Claude's startup hook also uses Node.js.
+
+## Updates
+
+The Codex installation above tracks this GitHub repository's `main` branch, rather than a development folder on your machine. To fetch the current release and reinstall it:
+
+```sh
+codex plugin marketplace upgrade chatdata-free
+codex plugin add chatdata@chatdata-free
+```
+
+Start a new task and rerun the setup prompt to confirm the installed version. This is an explicit update workflow; ChatData does not add a background updater or promise that your client automatically polls GitHub.
+
+For Claude Code:
+
+```sh
+claude plugin marketplace update chatdata-free
+claude plugin update chatdata@chatdata-free
+```
+
+Restart Claude Code and run `/chatdata:status`.
+
+For Cursor or a Codex project skills install, run these from your clean source checkout:
+
+```sh
+git pull --ff-only
+python3 scripts/install.py --client cursor --project /absolute/path/to/your-project --update
+```
+
+Use `--client codex` for `.agents/skills/`. If Git reports local changes or a conflict, inspect them before updating; do not discard your edits. Start a new chat after the update.
+
+## If setup stops
+
+| What you see | Next step |
+| --- | --- |
+| `codex`, `claude`, `git`, or `python3` is not found | Install or open the required client/tool first. ChatData does not bundle the AI client. |
+| Plugin commands are unavailable in Codex | Update the client, or use `scripts/install.py --client codex` for your project. |
+| Skills do not appear | Start a new session in the project you installed into, then select the ChatData skill explicitly. Check that the plugin is enabled in your client's plugin manager. |
+| Existing ChatData folders | Use `--update` to back them up and replace them. The installer leaves unrelated skills alone. |
+| The agent asks to run a local command | Review the exact command and grant only the permission needed for that command. Do not disable your client's safeguards. |
+| The doctor fails | Keep the error, check Python 3.9+ and the installed version, refresh the package, then retry. Do not treat a failed check as a successful setup. |
+| Another marketplace is broken | A broad marketplace listing may fail for an unrelated source. Try the exact `chatdata@chatdata-free` install command first; do not remove other plugins to fix ChatData. |
+| The AI client requires a login or subscription | Use that client's sign-in. There is no separate ChatData account. |
 
 ## What you can do
 
@@ -96,7 +148,7 @@ The bundled installer and analytical helpers make no network requests and have n
 
 ## For your whole team
 
-The individual plugin stays free. If you want help applying these methods across your team, [contact Paras about ChatData advisory](mailto:support@getchatdata.com?subject=ChatData%20team%20advisory). Advisory is a separate service for metric definitions, workflow design, evaluation, and adoption. You do not need to buy advisory to use any skill.
+The individual plugin stays free. If you want help applying these methods across your team, [contact Paras about ChatData advisory](mailto:support@getchatdata.com?subject=ChatData%20team%20advisory). Advisory is a separate service for shared AI infrastructure: definitions, reusable context, workflow design, and evaluating whether agents use that context correctly. You do not need to buy advisory to use any skill.
 
 ## Contribute
 

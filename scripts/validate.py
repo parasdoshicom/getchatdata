@@ -8,7 +8,7 @@ root=Path(__file__).resolve().parents[1]; plugin=root/'plugins/chatdata'
 claude=json.loads((plugin/'.claude-plugin/plugin.json').read_text())
 codex=json.loads((plugin/'.codex-plugin/plugin.json').read_text())
 assert claude['name']==codex['name']=='chatdata'
-assert claude['version']==codex['version']=='1.0.0'
+assert claude['version']==codex['version']==json.loads((plugin/'scripts/package-info.json').read_text())['version']
 assert claude['license']==codex['license']=='MIT'
 for file in root.rglob('*.json'):
     if '.git' not in file.parts: json.loads(file.read_text())

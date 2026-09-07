@@ -1,5 +1,17 @@
 ---
-description: Show ChatData version, available skills, and a first useful task.
+description: Verify ChatData setup with three local synthetic checks and choose your first useful analysis.
 ---
 
-Read the plugin manifest and list installed skill directories. Report ChatData 1.0.0, free and open source, only if those match the installed files. Explain that no ChatData sign-in or hosted MCP is required. Check whether Python 3 is available before offering the runnable examples. Suggest one task using data-science, or the synthetic examples when no data is supplied. Do not change user settings or claim connections are working without checking them.
+This command belongs to the free ChatData plugin at `${CLAUDE_PLUGIN_ROOT}`. Use only this resolved installation. Read `${CLAUDE_PLUGIN_ROOT}/scripts/package-info.json` and list `${CLAUDE_PLUGIN_ROOT}/skills/`.
+
+Check Python 3.9+ availability, then run exactly:
+
+```sh
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py"
+```
+
+Claude substitutes the plugin root in this command content. Do not rely on the current working directory or a shell environment variable. If the root is unresolved or the file is absent, stop and report that exact setup failure. Never search the home directory or another ChatData installation, fall back to hosted MCP instructions, invent a fixture, or replace the doctor with an ad hoc calculation. Do not install dependencies or change client settings.
+
+Report the observed version and the three check results. A passing helper check proves local calculations only; confirm the selected ChatData skill is available in this session separately. Do not claim connected data works or that all model answers are correct. If a step fails, state the exact failure and a targeted repair.
+
+Explain that ChatData is free, with no ChatData login or hosted MCP required; AI client fees can apply. If no data was supplied, offer the mix-shift example as the first task. When the user asks to run the example, read `${CLAUDE_PLUGIN_ROOT}/skills/root-cause/SKILL.md` and `${CLAUDE_PLUGIN_ROOT}/examples/mix-shift.csv`. Run `${CLAUDE_PLUGIN_ROOT}/scripts/analyze.py` on that exact CSV, explain why the rate changed, and save an analysis record in their chosen folder. If an earlier setup step failed, do not manufacture a successful example or record. On the next session, point the agent at that record and recheck freshness before reuse. Show the installed version instead of inventing the latest release.

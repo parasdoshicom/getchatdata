@@ -123,6 +123,7 @@ class PackagingTests(unittest.TestCase):
     def test_cli_provenance(self):
         r=subprocess.run([sys.executable,str(P/'scripts/analyze.py'),'decompose',str(P/'examples/mix-shift.csv')],capture_output=True,text=True,check=True)
         self.assertEqual(len(json.loads(r.stdout)['provenance']['input_sha256']),64)
+        self.assertEqual(json.loads(r.stdout)['provenance']['tool'], 'ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'])
     def test_cli_bad_input_fails(self):
         r=subprocess.run([sys.executable,str(P/'scripts/analyze.py'),'experiment','--control-n','0','--control-success','0','--treatment-n','5','--treatment-success','1'],capture_output=True,text=True)
         self.assertEqual(r.returncode,2); self.assertIn('error',json.loads(r.stderr))
@@ -139,6 +140,6 @@ class PackagingTests(unittest.TestCase):
                 self.assertEqual((existing/'keep').read_text(),'preserve')
     def test_hook_has_branding_and_no_settings_mutation(self):
         r=subprocess.run(['node',str(P/'scripts/session-start.js')],text=True,capture_output=True,check=True)
-        self.assertIn('ChatData 1.0.0',json.loads(r.stdout)['hookSpecificOutput']['additionalContext'])
+        self.assertIn('ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'],json.loads(r.stdout)['hookSpecificOutput']['additionalContext'])
 
 if __name__=='__main__': unittest.main()
