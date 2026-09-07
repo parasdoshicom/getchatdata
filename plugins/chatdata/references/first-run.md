@@ -8,7 +8,7 @@ In Claude Code, `/chatdata:status` also runs the setup check. Selecting the skil
 
 ## What should happen
 
-The agent reads the installed skill, locates `scripts/doctor.py` in the native plugin or project skill folder, and runs it with Python 3.9+. The doctor uses bundled synthetic data and makes no network requests or file writes. It checks:
+The agent reads the installed skill, resolves `scripts/doctor.py` in that installation, and runs `python3 "<resolved absolute path>/scripts/doctor.py"` with Python 3.9+. Invoke Python explicitly; the .py file is not an executable command. The doctor uses bundled synthetic data and makes no network requests or file writes. It checks:
 
 - Mix: conversion falls from 17% to 8%, with the full 9 percentage-point drop explained by customer mix.
 - Funnel: 3 visits, 2 signups, 1 purchase after handling ordering, duplicates and the observation window.
@@ -16,7 +16,7 @@ The agent reads the installed skill, locates `scripts/doctor.py` in the native p
 
 The agent then uses root-cause for the requested mix analysis, runs the helper, explains that arithmetic contribution does not establish what caused the mix to change, and writes the definition, command, result, checks and caveats into the agreed folder. Label the example synthetic and the record proposed until the user actually reviews it. Never invent a reviewer or review date.
 
-Show the user the output path and the result. Three passing helper checks do not prove live data access, that every skill was loaded, or that future model answers will be correct.
+Save only the requested analysis record for this synthetic run; do not create client memory or write outside the agreed project. Show the user the output path and the result. Three passing helper checks do not prove live data access, that every skill was loaded, or that future model answers will be correct.
 
 ## Pick up the work next time
 

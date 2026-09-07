@@ -43,7 +43,15 @@ git clone https://github.com/parasdoshicom/getchatdata.git
 python3 getchatdata/scripts/install.py --client cursor --project /absolute/path/to/your-project
 ```
 
-Replace the project path with your existing data project. Start a new Cursor agent chat and ask: “Use ChatData to analyze this funnel.” The installer puts the same skills and helpers in `.cursor/skills/chatdata-*`. Cursor loads these as native skills; this does not claim a listing in Cursor's marketplace.
+Replace the project path with your existing data project. Start a new Cursor agent chat in that project, select `/chatdata-data-science`, and use the first-run prompt below. The installer puts the same skills and helpers in `.cursor/skills/chatdata-*`. Cursor loads these as native skills; this does not claim a listing in Cursor's marketplace.
+
+To check the installed helpers without asking the AI, run:
+
+```sh
+python3 "/absolute/path/to/your-project/.cursor/skills/chatdata-data-science/scripts/doctor.py"
+```
+
+This should report three passing synthetic checks. Skill discovery and a real agent response are separate checks; follow the first-run guide to verify those.
 
 The installer preserves existing files and refuses to overwrite an installed ChatData skill unless you request `--update`. Updates move the old ChatData folders, including local edits, into the printed `chatdata-backups/` directory before installing the new copy. Review and reapply any customizations you want to keep. Unrelated skills are preserved. If an update fails, the installer restores the prior folders. To uninstall, remove only the `chatdata-*` folders it created; keep backups until you no longer need them. For native plugins, use the client's plugin manager.
 
@@ -153,3 +161,5 @@ The individual plugin stays free. If you want help applying these methods across
 ## Contribute
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep client-specific packaging separate from shared analytical behavior. [MIT license](LICENSE).
+
+For the tested client versions, actual workflow results and remaining limits, see [client verification](docs/client-verification.md).
