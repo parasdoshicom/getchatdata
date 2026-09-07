@@ -5,6 +5,8 @@ description: Set up ChatData, verify its local examples, or choose and carry out
 
 # Start with the decision
 
+Use the installation that supplied this skill. In Claude Code its native root is `${CLAUDE_PLUGIN_ROOT}`: read references and run scripts under that resolved absolute path. In Codex, resolve `../../` from the absolute path of this loaded SKILL.md; in a project install use this skill folder itself. Never search the home directory, choose a different ChatData installation, or substitute hosted MCP setup. If this installation cannot be resolved, report the missing path and stop.
+
 Read [the working agreement](../../references/working-agreement.md) when using this skill. It defines source, privacy, execution, and evidence boundaries.
 
 For installation, setup checks, or a first run without customer data, read [the first-run guide](../../references/first-run.md). Run `../../scripts/doctor.py` when asked to verify setup. It runs three synthetic checks without network access or file writes. Explain its scope honestly: local helpers passed, while client discovery and live data are separate checks. If asked to try an analysis, continue through the example and save a usable record; a diagnostic printout alone is not the first analysis.

@@ -32,7 +32,7 @@ codex plugin marketplace add parasdoshicom/getchatdata --ref main
 codex plugin add chatdata@chatdata-free
 ```
 
-Start a new task and ask: “Use ChatData to check setup and run its synthetic examples.” Select ChatData’s data-science skill if it is not picked automatically. Native plugins work in Codex desktop and CLI; the IDE extension should use the project skills installer. If your Codex version does not offer plugin commands, use the project skills installer below with `--client codex`; it installs into `.agents/skills/`.
+Start a new task, select ChatData’s **data-science** skill, and use the first-run prompt below. Native plugins work in Codex desktop and CLI; the IDE extension should use the project skills installer. If your Codex version does not offer plugin commands, use the project skills installer below with `--client codex`; it installs into `.agents/skills/`.
 
 ### Cursor
 
@@ -49,7 +49,7 @@ The installer preserves existing files and refuses to overwrite an installed Cha
 
 ## First run: get one useful answer
 
-After installation, start a fresh agent session and paste:
+After installation, start a fresh agent session. Select `/chatdata:data-science` in Claude Code, ChatData’s **data-science** skill in Codex, or `/chatdata-data-science` in Cursor. Then paste:
 
 > Use ChatData to check setup, then analyze its bundled mix-shift example. Run the calculation, explain what changed, and save a reusable analysis record in analysis/chatdata-first-run/. Use only the synthetic example; do not connect to my data.
 

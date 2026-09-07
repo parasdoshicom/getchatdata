@@ -1,10 +1,10 @@
 # Your first useful analysis
 
-Start a new agent session after installation. Ask:
+Start a new agent session after installation. First select the installed skill: `/chatdata:data-science` in Claude Code, ChatData’s **data-science** skill in Codex, or `/chatdata-data-science` in Cursor. Then ask:
 
 > Use ChatData to check setup, then analyze its bundled mix-shift example. Run the calculation, explain what changed, and save a reusable analysis record in analysis/chatdata-first-run/. Use only the synthetic example; do not connect to my data.
 
-In Claude Code, `/chatdata:status` runs the setup check. In Codex, select ChatData's data-science skill if the agent does not pick it automatically. In Cursor, select `/chatdata-data-science`. If a skill is missing, confirm the project and restart the chat before changing any settings.
+In Claude Code, `/chatdata:status` also runs the setup check. Selecting the skill explicitly avoids confusing it with an older ChatData installation. If a skill is missing, confirm the project and restart the chat before changing any settings.
 
 ## What should happen
 
