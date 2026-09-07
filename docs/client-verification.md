@@ -14,15 +14,15 @@ A process exiting successfully is insufficient: it may still have used the wrong
 
 ### Claude Code
 
-Claude Code 2.1.261, using Sonnet, loaded all 16 skills and ran the explicit `/chatdata:data-science` first-run flow against version 1.1.2. The final run had no failed tool calls or permission denials. It invoked the installed doctor with `python3`, used the bundled mix-shift file, reproduced 17% → 8% with −9 percentage points from mix, zero within-segment contribution and zero residual, and saved a proposed analysis record plus raw output only inside the requested disposable project. It did not search another installation or create client-memory files.
+Claude Code 2.1.261, using Sonnet and the native `--plugin-dir` option, loaded all 16 skills and ran the explicit `/chatdata:data-science` first-run flow against version 1.1.2. The final run had no failed tool calls or permission denials. It invoked the installed doctor with `python3`, used the bundled mix-shift file, reproduced 17% → 8% with −9 percentage points from mix, zero within-segment contribution and zero residual, and saved a proposed analysis record plus raw output only inside the requested disposable project. It did not search another installation or create client-memory files.
 
-Claude’s strict marketplace and plugin validators reported no errors or warnings. The separate `/chatdata:status` setup flow also passed after its plugin-root repair.
+This tested the unpacked plugin in a real Claude session. Marketplace download/install was not exercised because the test preserved the existing global Claude configuration. Claude’s strict marketplace and plugin validators reported no errors or warnings. The separate `/chatdata:status` setup flow also passed after its plugin-root repair.
 
 ### Codex
 
 Codex CLI 0.153.4 installed ChatData from the public GitHub marketplace. A fresh GPT-5.6 Sol session with high reasoning loaded the native data-science and root-cause skills in version 1.1.1, invoked both helpers with `python3`, passed all three setup checks, reproduced the mix result, and saved one proposed synthetic analysis record. The record included the installed version, exact commands, source hash, checks, caveats and conditions for rerunning it. It did not invent a reviewer.
 
-The native GitHub update commands were exercised successfully. A separate Codex project-skills runtime also passed on version 1.0.0. During the final native run, harmless checks for absent project metadata and Git state returned errors in the disposable directory; the analytical workflow completed.
+The native GitHub update commands were exercised successfully. Final version 1.1.2 was installed and enabled; all 32 published plugin files matched the installed cache byte for byte, and its exact installed doctor passed all three checks. The version 1.1.2 change made Python invocation explicit; the preceding model run had already used that invocation correctly. A separate Codex project-skills runtime also passed on version 1.0.0. During the final native run, harmless checks for absent project metadata and Git state returned errors in the disposable directory; the analytical workflow completed.
 
 ## Cursor: authentication still required
 
