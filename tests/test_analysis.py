@@ -140,6 +140,14 @@ class PackagingTests(unittest.TestCase):
                 self.assertEqual((existing/'keep').read_text(),'preserve')
     def test_hook_has_branding_and_no_settings_mutation(self):
         r=subprocess.run(['node',str(P/'scripts/session-start.js')],text=True,capture_output=True,check=True)
-        self.assertIn('ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'],json.loads(r.stdout)['hookSpecificOutput']['additionalContext'])
+        context=json.loads(r.stdout)['hookSpecificOutput']['additionalContext']
+        self.assertIn('ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'],context)
+        self.assertIn('Dashboard linking is required for ChatData analysis',context)
+        self.assertNotIn('skills still work locally if reporting is disconnected',context)
+
+    def test_readme_uses_dashboard_linking_without_legacy_prompt_commands(self):
+        readme=(ROOT/'README.md').read_text()
+        self.assertIn('dashboard creates the complete command',readme)
+        self.assertNotIn('telemetry.py connect --client',readme)
 
 if __name__=='__main__': unittest.main()

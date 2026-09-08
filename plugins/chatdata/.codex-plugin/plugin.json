@@ -1,6 +1,6 @@
 {
   "name": "chatdata",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
   "author": {
     "name": "Paras Doshi",

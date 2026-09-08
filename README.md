@@ -111,20 +111,9 @@ On update, the installer moves the old ChatData folders, including local edits, 
 
 Dashboard linking is part of the standard setup in your [ChatData dashboard](https://getchatdata.com/dashboard). Sign in by email, choose your client, and create one combined install-and-link command. The command is already linked to your verified email. It runs without an interactive prompt, including inside Claude Code.
 
-From the cloned repository root, link Claude Code to your dashboard:
+Do not run a separate linking command or paste a secret into your agent. The dashboard creates the complete command for Claude Code, Codex, or Cursor after it verifies your email. Copy that command once; it installs ChatData and links that client in the same step without asking for terminal input.
 
-```sh
-python3 plugins/chatdata/scripts/telemetry.py connect --client claude-code --enable-statusline
-```
-
-Link Codex or Cursor with the same script:
-
-```sh
-python3 plugins/chatdata/scripts/telemetry.py connect --client codex
-python3 plugins/chatdata/scripts/telemetry.py connect --client cursor
-```
-
-Before creating the command, the dashboard lists every usage field ChatData receives. The command contains a single-use setup code tied to your verified email and selected client. The code expires after 20 minutes, is exchanged automatically for a revocable local installation credential, and cannot be reused. A direct `connect` command remains available as a compatibility fallback. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
+Before creating the command, the dashboard lists every usage field ChatData receives. The command contains a single-use setup code tied to your verified email and selected client. The code expires after 20 minutes, is exchanged automatically for a revocable local installation credential, and cannot be reused. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
 
 The dashboard calls these **tracked ChatData prompts** and **completed workflows**. Estimated time saved is `max(your baseline minutes − observed elapsed minutes, 0)` for each completed workflow. Estimated value multiplies that time by the hourly value you entered. These are user-configured estimates. They are not measured productivity gains or reductions in an AI provider bill. Elapsed time can include idle time.
 

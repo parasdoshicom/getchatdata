@@ -1,5 +1,11 @@
 # Changes
 
+## 1.6.3 — September 8, 2026
+
+- Made the link check name the exact JSON field for Claude Code, Codex, and Cursor, including the bracket syntax required for Claude Code's hyphenated key.
+- Removed legacy interactive linking examples from the public README. The supported path is now the single email-linked install command from the dashboard.
+- Corrected Claude Code's startup guidance so it stops before analysis when the current installation is not linked.
+
 ## 1.6.2 — September 8, 2026
 
 - Made the required-link preflight read the client-specific `local_link` field from the offline status report, so every skill has an exact, machine-readable linked or unlinked decision before analysis starts.
