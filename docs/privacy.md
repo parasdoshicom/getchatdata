@@ -8,16 +8,16 @@ The short version: ChatData does not receive your datasets, prompts, conversatio
 
 ## What the plugin does on your machine
 
-The public package contains text instructions, two synthetic CSV examples, a Python installer, a setup doctor, a small standard-library analysis helper, and an optional usage reporter.
+The public package contains skill instructions, synthetic CSV examples, an installer, and local analysis tools. It also includes an optional usage reporter and a release update checker.
 
 - The project installer copies the 16 skill folders into the project path you provide. It does not change global client settings.
 - The setup doctor runs three calculations against bundled synthetic data. It makes no network requests and writes no files.
 - The analysis helper reads the input you name, runs the requested calculation, and prints JSON. When it reads a local CSV, it records that file's SHA-256 hash in the output. The hash supports reproducibility; the helper does not upload it.
-- The Claude discovery script, `session-start.js`, reads the local package version and prints discovery text. It does not inspect your project, read your data, change permissions, or call a network service.
+- At Claude Code startup, ChatData reads the installed version and prints discovery text. It also checks the latest public GitHub release at most once a day. The check sends no account token, prompt, dataset, path, or project information. It stores only a local release-check cache under `~/.chatdata/`. GitHub receives ordinary connection information, including the requesting IP address. Set `CHATDATA_UPDATE_CHECK=0` in Claude Code’s environment to disable checks. This check is independent of usage reporting.
 - A separate SessionStart usage hook attempts to flush already-consented metadata waiting in the local queue. It does nothing when reporting is not linked.
 - Separate Claude hooks can notice an explicit ChatData skill invocation and the end of that turn. They ignore the prompt and answer. Reporting stays off until you link an installation and accept the local consent prompt.
 - The optional reporter stores its token, pending events, and the latest account summary under `~/.chatdata/`. The token and queue files use owner-only permissions where the operating system supports them.
-- ChatData has no background updater. A linked installation retries its content-free queue during ChatData activity and setup checks; it does not scan your files.
+- Update notices do not install software. You choose when to invoke `/chatdata:update`, which uses Claude Code’s native marketplace and plugin update commands. ChatData has no background updater. A linked installation retries its content-free queue during ChatData activity and setup checks; it does not scan your files.
 
 You choose whether an agent writes an analysis record and where it writes that file. ChatData suggests a path inside your current project, such as `analysis/<question>/`, because a visible local record is easy to inspect and reuse. The plugin does not copy that record elsewhere or synchronize it between clients.
 
@@ -27,7 +27,7 @@ The official download asks for an email address and sends a sign-in link. By sig
 
 The dashboard creates a different installation token for each client you link. The token is shown once. ChatData stores a hash of it on the server rather than the token itself. Enter the token through the reporter's hidden prompt so it does not become part of shell history. Local configuration keeps each token separate, and each queued event is bound to a one-way fingerprint of the token that created it.
 
-Nothing is reported until all three things happen: you create a token in the dashboard, run `telemetry.py connect`, and answer yes to the local consent question. An existing unlinked installation remains local and fully usable.
+Usage reporting starts only after you create a dashboard token, run `telemetry.py connect`, and accept the local consent prompt. An existing unlinked installation remains local and fully usable.
 
 For an explicit ChatData workflow, a linked installation can send only these event fields:
 
@@ -85,7 +85,7 @@ If your policy requires on-device inference, use an AI client and model configur
 ## Other network activity
 
 - **Account, dashboard, and usage service.** Signing in, changing preferences, managing tokens, loading the dashboard, and sending linked usage events contact ChatData's website services.
-- **Installation and updates.** Cloning, downloading, or updating the public repository contacts GitHub. GitHub receives the request under its own privacy policy and may record standard connection information.
+- **Installation and updates.** Cloning, downloading, or updating the public repository contacts GitHub. Claude Code startup can also fetch public release metadata for an update notice, without usage linking or an account credential. GitHub receives the request under its own privacy policy and may record standard connection information.
 - **AI use.** Your chosen client and model provider process the content that client sends to them. ChatData does not control that transmission or the provider's retention settings.
 - **Connected data tools.** A warehouse, database, notebook, chart service, or other tool you authorize may receive queries and return data under its own terms.
 - **Website visits.** Cloudflare serves `getchatdata.com` and may process request, performance, and security information. The website loads a Cloudflare analytics and performance beacon and can send application error events with configured technical context to PostHog. Those website systems do not receive the content analyzed by the local plugin through ChatData usage events.

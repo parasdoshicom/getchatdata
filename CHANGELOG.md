@@ -1,5 +1,12 @@
 # Changes
 
+## 1.3.0 — September 7, 2026
+
+- Added a Claude Code startup notice for newer published releases, with `/chatdata:update` to update when requested. An existing ChatData status line also shows the cached notice.
+- Added bounded public GitHub release checks, cached for a day and quiet when current or unavailable. `CHATDATA_UPDATE_CHECK=0` disables them.
+- Kept existing Woz/custom status lines intact and kept update checks separate from usage reporting.
+- Documented the public metadata request and local cache in the privacy notice.
+
 ## 1.2.1 — September 7, 2026
 
 - Kept consented usage events queued when a client sandbox or temporary network failure blocks delivery, and exposed only the fixed `retry_required` status and a fixed error category to the agent.

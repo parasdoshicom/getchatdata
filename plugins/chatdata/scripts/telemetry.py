@@ -526,7 +526,10 @@ def claude_hook():
 
 def _claude_settings_path():
     override = os.environ.get("CHATDATA_CLAUDE_SETTINGS")
-    return Path(override) if override else Path.home() / ".claude" / "settings.json"
+    if override:
+        return Path(override)
+    config_root = Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude")))
+    return config_root / "settings.json"
 
 
 def install_statusline():

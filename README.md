@@ -14,7 +14,7 @@ You could assemble this yourself: write Markdown skill files, package them for e
 
 The skills ask your agent to save the question, metric definition, source, code, checked outputs, caveats, and conditions that would invalidate the answer in a local folder you choose. Keep that folder and point the next session at it. The agent can inspect the record, rerun the calculation, and recheck changed inputs before continuing.
 
-The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery and optional usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
+The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery, update notices, and optional usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
 
 ## What changes when ChatData is installed
 
@@ -270,14 +270,30 @@ codex plugin add chatdata@chatdata-free
 
 Start a new task and rerun the setup prompt to confirm the installed version. ChatData does not run a background updater or promise that your client polls GitHub automatically.
 
-For Claude Code:
+### Claude Code update notices
+
+At session startup, ChatData checks its latest published GitHub release at most once a day. When a newer version is available, it shows:
+
+```text
+ChatData 1.4.0 is available (installed: 1.3.0). Run /chatdata:update to update, then run /reload-plugins.
+```
+
+The version above is an illustration. The real notice uses the published version. If you already enabled ChatData’s status line, the same notice appears beside your estimates while preserving Woz or your existing status line. You do not need to link usage reporting to receive the startup notice.
+
+Run `/chatdata:update` when you want to update. The command refreshes the `chatdata-free` marketplace and updates only the ChatData plugin in its existing installation scope. It reports the result and asks you to run `/reload-plugins` or restart Claude Code. It does not install an update automatically or enable a background updater.
+
+The terminal equivalent for a user-scoped installation is:
 
 ```sh
 claude plugin marketplace update chatdata-free
-claude plugin update chatdata@chatdata-free
+claude plugin update chatdata@chatdata-free --scope user
 ```
 
-Restart Claude Code and run `/chatdata:status`.
+Restart Claude Code and run `/chatdata:status`. A project or local installation uses its corresponding `--scope` value. Managed installations need their administrator’s update route.
+
+Up-to-date installs stay quiet. A network failure does not interrupt your work; a previously cached update notice may remain. The check fetches only public release metadata, without an account token, prompt, dataset, or project information. GitHub still receives normal connection information. Set `CHATDATA_UPDATE_CHECK=0` in the environment that launches Claude Code to turn these checks off. The analysis helpers remain usable without them.
+
+Existing versions need one manual update to get this feature; future sessions can then show newer-release notices.
 
 For Cursor or a project-scoped Codex install, run these commands from a clean source checkout:
 
