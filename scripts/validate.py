@@ -7,8 +7,10 @@ import re
 root=Path(__file__).resolve().parents[1]; plugin=root/'plugins/chatdata'
 claude=json.loads((plugin/'.claude-plugin/plugin.json').read_text())
 codex=json.loads((plugin/'.codex-plugin/plugin.json').read_text())
+marketplace=json.loads((root/'.claude-plugin/marketplace.json').read_text())
 assert claude['name']==codex['name']=='chatdata'
 assert claude['version']==codex['version']==json.loads((plugin/'scripts/package-info.json').read_text())['version']
+assert marketplace['plugins'][0]['version']==claude['version']
 assert claude['license']==codex['license']=='MIT'
 for file in root.rglob('*.json'):
     if '.git' not in file.parts: json.loads(file.read_text())
@@ -28,4 +30,5 @@ for file in root.rglob('*.md'):
             assert (file.parent/link.split('#')[0]).exists(),f'Broken documentation link: {file}: {link}'
 assert (root/'LICENSE').read_text()==(plugin/'LICENSE').read_text()
 assert not (plugin/'.mcp.json').exists(),'Free core must not require hosted MCP'
+assert (plugin/'scripts/telemetry.py').is_file() and (plugin/'scripts/claude-statusline.py').is_file()
 print(f'Validated {len(skills)} skills, local links, manifests, MIT license and offline core.')

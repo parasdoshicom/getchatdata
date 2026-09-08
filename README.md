@@ -4,7 +4,7 @@
 
 ChatData gives Claude Code, Codex, and Cursor 16 data science skills for the work between “I have data” and “I trust this decision.” It helps one data scientist frame the question, choose a method, and run the analysis. It also asks the agent to challenge the conclusion and leave a local record another session can recheck.
 
-It is MIT licensed and open source. There is no ChatData account, trial, license key, usage meter, or paid feature tier. Your AI client, model usage, warehouse, and other tools may still cost money.
+It is MIT licensed and open source, with no trial, license key, or paid feature tier. The official download starts with a free personal account. After installation, you can link content-free usage reporting to see how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
 
 [Install](#install) · [Try it on synthetic data](#first-run-get-one-useful-answer) · [Explore all 16 capabilities](docs/capabilities.md) · [Privacy](docs/privacy.md) · [Source](https://github.com/parasdoshicom/getchatdata)
 
@@ -43,9 +43,9 @@ Try a focused skill directly:
 /chatdata:experiment-analysis Check whether this A/B result is trustworthy.
 ```
 
-The plugin uses the ChatData name, command namespace, and a startup context hook. The hook reports the installed version and how to start. It does not read your data, change permissions, replace your status line, or overwrite other plugins.
+The plugin uses the ChatData name, command namespace, and startup hooks. The discovery hook reports the installed version and how to start. If you link usage reporting, separate hooks count explicit ChatData skill invocations and when that turn finishes. They do not send the prompt or answer.
 
-If another installed ChatData package uses the same `/chatdata:` namespace, enable one version for a session so the client does not select the wrong skill root. You do not need a separate ChatData account for this package.
+If another installed ChatData package uses the same `/chatdata:` namespace, enable one version for a session so the client does not select the wrong skill root.
 
 ### Codex
 
@@ -90,6 +90,41 @@ python3 getchatdata/scripts/install.py --client codex --project /absolute/path/t
 The installer writes the skills into `.agents/skills/chatdata-*`. It preserves unrelated skills and refuses to overwrite existing ChatData folders unless you pass `--update`.
 
 On update, the installer moves the old ChatData folders, including local edits, into the printed `chatdata-backups/` directory before installing the new copy. Review and reapply any customization you want to keep. If installation fails after the backup begins, the installer restores the prior folders.
+
+## Link your personal usage dashboard
+
+Create one installation token for each client in your [ChatData dashboard](https://getchatdata.com/dashboard). The token appears once. Enter it through the hidden prompt so it does not become part of your shell history.
+
+From the cloned repository root, link Claude Code and add ChatData's estimate row beneath an existing Claude status line:
+
+```sh
+python3 plugins/chatdata/scripts/telemetry.py connect --client claude-code --enable-statusline
+```
+
+Link Codex or Cursor with the same script:
+
+```sh
+python3 plugins/chatdata/scripts/telemetry.py connect --client codex
+python3 plugins/chatdata/scripts/telemetry.py connect --client cursor
+```
+
+The consent prompt lists the complete event fields before anything is saved or sent. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
+
+The dashboard calls these **tracked ChatData prompts** and **completed workflows**. Estimated time saved is `max(your baseline minutes − observed elapsed minutes, 0)` for each completed workflow. Estimated value multiplies that time by the hourly value you entered. These are user-configured estimates. They are not measured productivity gains or reductions in an AI provider bill. Elapsed time can include idle time.
+
+Claude Code can show both estimates in its status line:
+
+```text
+ChatData · 1.2h estimated saved · $187.50 estimated value
+```
+
+ChatData copies and wraps the existing status-line command, including Woz or a custom command. Local disconnect restores the exact previous setting if it has not changed in the meantime. Codex and Cursor do not have a ChatData footer; use the personal dashboard or check the cached summary locally:
+
+```sh
+python3 plugins/chatdata/scripts/telemetry.py status
+```
+
+If the service is temporarily unavailable, metadata waits in a local queue and retries later. Analysis continues. Each client's queue stays bound to the token that created it. If you replace a client's token, ChatData discards any unsent events for that earlier installation rather than attributing them to the new one. To disconnect this machine, run `python3 plugins/chatdata/scripts/telemetry.py disconnect`. Then revoke that installation token in the dashboard. Revoking one client token does not disconnect your other clients.
 
 ## First run: get one useful answer
 
@@ -208,9 +243,11 @@ A record starts as **proposed**. It becomes **reviewed by user** only when a per
 
 ## Privacy
 
-The project installer, setup doctor, analytical helper, and Claude Code discovery hook contain no ChatData telemetry. The doctor makes no network requests or file writes. The helper reads only the path supplied to it and prints its result locally.
+The project installer, setup doctor, analytical helper, and unlinked skills do not send usage events. The doctor makes no network requests or file writes. The helper reads only the path supplied to it and prints its result locally.
 
-Your AI client may still send prompts, selected files, and tool output to its model provider. Connected warehouses and other tools have their own policies. Installing or updating from this repository contacts GitHub. Visiting the website contacts its host. “The helper runs locally” does not mean a cloud AI model keeps everything on-device.
+Usage reporting starts only after you create an installation token in the dashboard, run `connect`, and accept the local consent prompt. It reports fixed workflow metadata and excludes the content of the work. Events never contain prompts, conversations, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs. Your account email is stored with your personal account, but it is not placed in usage events.
+
+Your AI client may still send prompts, selected files, and tool output to its model provider. Connected warehouses and other tools have their own policies. Installing or updating from this repository contacts GitHub. Visiting the website and using the personal dashboard contacts ChatData's website services. “The helper runs locally” does not mean a cloud AI model keeps everything on-device.
 
 Read [the privacy notice](docs/privacy.md) before using private, personal, regulated, or customer data. Keep credentials, raw private data, and analysis records out of public issues and commits.
 
@@ -254,7 +291,7 @@ Use `--client codex` for `.agents/skills/`. If Git reports local changes or a co
 | The agent asks to run a local command | Review the exact command and grant only the permission it needs. Do not disable the client's safeguards. |
 | The doctor fails | Keep the error, check Python 3.9+ and the installed version, refresh the package, then retry. A failed doctor is not a successful setup. |
 | Another marketplace source is broken | Try the exact `chatdata@chatdata-free` install command first. Do not remove unrelated plugins to fix ChatData. |
-| The AI client requires a login or subscription | Use that client's sign-in. ChatData has no separate account. |
+| The AI client requires a login or subscription | Use that client's sign-in. Your free ChatData personal account is separate and provides the download steps and usage dashboard. |
 
 ## Evidence and limits
 
@@ -266,4 +303,4 @@ For tested client versions, actual workflow results, and remaining limits, see [
 
 ## Contribute
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep the release free of accounts, license checks, telemetry, and paid-feature dependencies. [MIT license](LICENSE).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep the release free of license checks and paid-feature dependencies, and keep usage events within the documented content-free schema. [MIT license](LICENSE).
