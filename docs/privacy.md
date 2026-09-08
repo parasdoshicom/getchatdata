@@ -13,7 +13,8 @@ The public package contains text instructions, two synthetic CSV examples, a Pyt
 - The project installer copies the 16 skill folders into the project path you provide. It does not change global client settings.
 - The setup doctor runs three calculations against bundled synthetic data. It makes no network requests and writes no files.
 - The analysis helper reads the input you name, runs the requested calculation, and prints JSON. When it reads a local CSV, it records that file's SHA-256 hash in the output. The hash supports reproducibility; the helper does not upload it.
-- The Claude Code startup hook reads the local package version and prints discovery text. It does not inspect your project, read your data, change permissions, or call a network service.
+- The Claude discovery script, `session-start.js`, reads the local package version and prints discovery text. It does not inspect your project, read your data, change permissions, or call a network service.
+- A separate SessionStart usage hook attempts to flush already-consented metadata waiting in the local queue. It does nothing when reporting is not linked.
 - Separate Claude hooks can notice an explicit ChatData skill invocation and the end of that turn. They ignore the prompt and answer. Reporting stays off until you link an installation and accept the local consent prompt.
 - The optional reporter stores its token, pending events, and the latest account summary under `~/.chatdata/`. The token and queue files use owner-only permissions where the operating system supports them.
 - ChatData has no background updater. A linked installation retries its content-free queue during ChatData activity and setup checks; it does not scan your files.
