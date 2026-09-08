@@ -1,5 +1,10 @@
 # Changes
 
+## 1.6.4 — September 8, 2026
+
+- Refresh the local dashboard summary whenever ChatData syncs, even when no usage events are waiting. Claude Code can now replace a stale “set your time baseline” footer after the account already has an estimate.
+- Keep the sync content-free: the refresh reads only the same aggregate workflow totals and estimate settings already shown in the dashboard.
+
 ## 1.6.3 — September 8, 2026
 
 - Made the link check name the exact JSON field for Claude Code, Codex, and Cursor, including the bracket syntax required for Claude Code's hyphenated key.
