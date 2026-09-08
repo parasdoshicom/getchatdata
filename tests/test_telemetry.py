@@ -263,11 +263,33 @@ class TelemetryTests(unittest.TestCase):
         event = T._event("workflow_started", str(T.uuid.uuid4()), "codex", "root-cause")
         event["occurred_at"] = "2025-01-01T00:00:00Z"
         T._write_queue([{"installation_key": T._installation_key(TOKEN), "event": event}])
-        with patch.object(T, "_request") as request:
+        remote = {"ok": True, "client": "codex", "consent_version": T.CONSENT_VERSION,
+                  "account_summary": SUMMARY}
+        with patch.object(T, "_request", return_value=remote) as request:
             result = T.flush()
         self.assertEqual(result["queued"], 0)
         self.assertEqual(T._queue_events(), [])
-        request.assert_not_called()
+        request.assert_called_once_with("GET", "/api/individual/config", TOKEN)
+
+    def test_flush_refreshes_stale_summary_when_nothing_is_queued(self):
+        self.link("claude-code")
+        T._write_json(T.paths()["summary"], {
+            **SUMMARY,
+            "baseline_minutes_per_workflow": None,
+            "estimates_configured": False,
+        })
+        current = {
+            "ok": True,
+            "client": "claude-code",
+            "consent_version": T.CONSENT_VERSION,
+            "account_summary": {**SUMMARY, "baseline_minutes_per_workflow": 30},
+        }
+        with patch.object(T, "_request", return_value=current) as request:
+            result = T.flush()
+        self.assertEqual(result["delivery_status"], "refreshed")
+        request.assert_called_once_with("GET", "/api/individual/config", TOKEN)
+        self.assertEqual(
+            T._read_json(T.paths()["summary"], {})["baseline_minutes_per_workflow"], 30)
 
     def test_flush_acknowledges_and_caches_server_summary(self):
         self.link("cursor")

@@ -334,8 +334,27 @@ def flush(silent=False):
             _write_queue(current)
         queued = current
     if not queued:
-        return {"telemetry": "linked", "queued": 0, "sent": 0,
-                "delivery_status": "nothing_queued"}
+        failures = []
+        for client, installation in config["installations"].items():
+            try:
+                response = _request("GET", "/api/individual/config", installation["token"])
+                if response.get("client") != client or response.get("consent_version") != CONSENT_VERSION:
+                    raise DeliveryError(
+                        "invalid_response",
+                        "ChatData usage service returned an invalid installation response.",
+                    )
+                _summary_from_response(response)
+            except DeliveryError as error:
+                failures.append((error.category, str(error)))
+            except RuntimeError as error:
+                failures.append(("service_error", str(error)))
+        if failures and not silent:
+            raise DeliveryError(failures[0][0], failures[0][1])
+        result = {"telemetry": "linked", "queued": 0, "sent": 0,
+                  "delivery_status": "retry_required" if failures else "refreshed"}
+        if failures:
+            result["error_category"] = failures[0][0]
+        return result
     sent = 0
     failures = []
     for client, installation in config["installations"].items():
