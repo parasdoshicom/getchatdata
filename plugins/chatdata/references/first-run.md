@@ -28,10 +28,14 @@ The user chooses what to keep. The plugin does not automatically synchronize rec
 
 Bring one CSV, one SQL query, or one experiment readout. Tell the agent what decision you need to make. It should inspect what you supplied and ask only for missing information that changes the answer. Read-only access is the default for connected sources; launching experiments, uploads and production changes require specific authorization.
 
+For a project with existing analysis work, use `/chatdata:onboard <project directory>`. It creates a private `chatdata-context/` folder and inventories supported files modified in that one directory during the last 30 days. The inventory uses filenames and filesystem metadata, not file contents or client conversation history. It does not move originals or make a network request. “Recently modified” is not proof that a file was used. If the folder already exists, refresh only the inventory reports and preserve the semantic model and trust records. Read [the local context guide](local-context.md) before turning any inventory item into reusable metric context.
+
+The first inventory is a map, not a completed semantic layer. The user must review the proposed metric definition, sources, checks, and caveats. Before answering a named metric as canonical, run the local context check for its exact name. A blocked check means stop that canonical answer, explain what is missing, stale, changed, or conflicting, and give the next action. Clearly labeled exploratory work and the bundled synthetic example remain available.
+
 For updates and setup errors, use the [public installation guide](https://github.com/parasdoshicom/getchatdata#install).
 
 ## Quick checks without losing your place
 
-In Claude Code, use `/chatdata:savings` for your cached workflow totals and `/chatdata:resume <analysis folder>` to pick up a saved record. In Codex or Cursor, ask the installed ChatData skill to show local status or resume the specific folder. The shared helper `python3 "<resolved plugin root>/scripts/status.py"` reports link state, pending events, and the next useful step without reading your conversations or sending a request. `--check` also runs the synthetic checks.
+In Claude Code, use `/chatdata:savings` for your cached workflow totals, `/chatdata:onboard <project directory>` to build local context, and `/chatdata:resume <analysis folder>` to pick up a saved record. In Codex or Cursor, ask the installed ChatData skill to onboard the explicit project, show local status, or resume the specific folder. The shared helper `python3 "<resolved plugin root>/scripts/status.py"` reports link state, pending events, and the next useful step without reading your conversations or sending a request. `--check` also runs the synthetic checks.
 
 The footer distinguishes an unlinked Claude installation, a linked account needing a time baseline, and cached savings. Pending events and old snapshots are labeled. A token saved locally is not proof that the server still accepts it; refresh via the dashboard or explicitly sync usage to check.

@@ -105,3 +105,7 @@ The plugin's working agreement tells the agent to treat source text and CSV cell
 We will publish material changes in this file so you can review them in Git history. The version you installed remains inspectable on your machine until you choose to update it.
 
 Questions about this notice can be sent to `support@getchatdata.com`. Please describe the product behavior or policy question without attaching private data.
+
+## Local context onboarding
+
+The local inventory reads file names, sizes, and modification times in a project folder you choose. It creates a local report and does not upload those paths or metadata. It does not read conversation history. Source fingerprint and evidence checks read only explicitly referenced local files. Your semantic model, inventory, review records, and report stay in your project; ChatData telemetry does not include them. Your AI client may read files you provide under its own data policy.

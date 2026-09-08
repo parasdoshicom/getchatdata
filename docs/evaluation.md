@@ -26,3 +26,7 @@ A case fails if its required behavior is absent, a claimed check was not run, a 
 ## Relationship to other tools
 
 The public [AI Analyst Lab repository](https://github.com/ai-analyst-lab/ai-analyst) and [nao](https://github.com/getnao/nao) also work on analytical context and reliability. This release's concrete scope is a free individual workflow across three clients, with shared skill source and small, inspectable local checks. We have not run a head-to-head evaluation. The skill text here is original; private course materials and third-party skill source are not redistributed.
+
+## Local context checks
+
+The local onboarding tests cover bounded metadata inventory, skipped and inaccessible files, no original-file mutation, review requirements, stale evidence, changed source fingerprints, and refusal when a metric is missing. Schema tests target the exact bundled Apache Ossie draft schema. This is not the full upstream SQL validator and does not establish that a reviewed definition or result is correct.

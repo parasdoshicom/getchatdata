@@ -4,7 +4,7 @@
 
 Your open-source data science workspace, ready to install. ChatData brings together 16 analysis skills, runnable Python checks, synthetic examples, and reusable record templates for Claude Code, Codex, and Cursor. It helps one person frame a question, run the analysis, challenge the conclusion, and save the evidence locally for the next session.
 
-It is MIT licensed and open source, with no trial, license key, or paid feature tier. The official download starts with a free personal account. After installation, you can link content-free usage reporting to see how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
+ChatData code is MIT licensed and open source (the bundled Apache Ossie schema retains its Apache 2.0 license), with no trial, license key, or paid feature tier. The official download starts with a free personal account. After installation, you can link content-free usage reporting to see how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
 
 [Install](#install) · [Try it on synthetic data](#first-run-get-one-useful-answer) · [Explore all 16 capabilities](docs/capabilities.md) · [Privacy](docs/privacy.md) · [Source](https://github.com/parasdoshicom/getchatdata)
 
@@ -15,6 +15,14 @@ You could assemble this yourself: write Markdown skill files, package them for e
 The skills ask your agent to save the question, metric definition, source, code, checked outputs, caveats, and conditions that would invalidate the answer in a local folder you choose. Keep that folder and point the next session at it. The agent can inspect the record, rerun the calculation, and recheck changed inputs before continuing.
 
 The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery, update notices, and optional usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
+
+## Start with the work already on your machine
+
+Ask ChatData to onboard one project folder. It inventories analysis files modified in the last 30 days and creates a visible `chatdata-context/` folder with an HTML report, file index, semantic model, and separate evidence records. Original files stay in place. The scan reads metadata only and reports skipped or incomplete coverage; modification time is not conversation or usage history.
+
+The semantic model follows a bundled, pinned **Apache Ossie draft schema**. Add dataset definitions and metric expressions there, with freshness, source fingerprints, checks, caveats, and your review in the adjacent trust record. Nothing starts approved. Before a trusted metric answer, the local check blocks missing definitions, changed sources, stale evidence, or unresolved conflicts and lists what needs attention.
+
+This checks recorded prerequisites, not analytical truth or every prompt in your client. Exploratory and synthetic work remains available with its limits stated. [See the onboarding commands, format, and review process](plugins/chatdata/references/local-context.md).
 
 ## What changes when ChatData is installed
 

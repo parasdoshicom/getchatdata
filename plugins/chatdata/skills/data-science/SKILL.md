@@ -11,6 +11,8 @@ Read [the working agreement](../../references/working-agreement.md) when using t
 
 For installation, setup checks, or a first run without customer data, read [the first-run guide](../../references/first-run.md). When asked to verify setup, invoke Python explicitly; do not execute the .py file directly. In Claude Code run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py"`. In Codex or a project install, first resolve the script from this loaded SKILL.md as described above, then run `python3 "<resolved absolute path>/scripts/doctor.py"`. It runs three synthetic checks without network access or file writes. Explain its scope honestly: local helpers passed, while client discovery and live data are separate checks. If asked to try an analysis, continue through the example and save a usable record; a diagnostic printout alone is not the first analysis.
 
+For onboarding an existing project or organizing recent analysis context, read [the local context guide](../../references/local-context.md). Require one explicit project directory. Initialize only that directory; never scan the home directory, global client history, or another project. The inventory contains supported filenames and filesystem modification metadata from the chosen window. It does not show actual usage, read source contents during setup, move originals, or use the network. Report incomplete coverage rather than assuming skipped or inaccessible context does not exist.
+
 Identify the decision, the available data, and the cost of a wrong answer. If the user is unsure, offer one concrete starting question and explain what its answer would change. Ask only for missing details that change the method; inspect provided files first.
 
 Route by the question:
@@ -25,6 +27,6 @@ Route by the question:
 
 Read the selected sibling SKILL.md, then execute it. In a project skills install, folder and skill names have a chatdata- prefix; locate the matching installed skill. Do not load all skills. Continue through calculation, relevant checks, and a usable result within the user's authorized scope. Planning alone does not complete an analysis.
 
-For a first run without data, use the bundled synthetic examples. Explain that example outputs are not evidence about the user's business. For a new recurring question, create a small local definition and rerun record after the user has reviewed its assumptions.
+For a first run without data, use the bundled synthetic examples. Explain that example outputs are not evidence about the user's business. For a new recurring question, create a small local definition and rerun record after the user has reviewed its assumptions. If the project has local context, run the exact metric check before presenting a canonical metric answer. A blocked result stops that canonical answer: show the gaps and next actions without filling them from guesswork. The user can still request clearly labeled exploratory or synthetic work.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.

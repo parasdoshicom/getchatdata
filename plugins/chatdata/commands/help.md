@@ -8,6 +8,7 @@ Show this concise guide. Do not run checks or change settings unless asked.
 | What you need | Try this |
 | --- | --- |
 | A first useful analysis | `/chatdata:data-science` — start with a question or the synthetic example |
+| Organize local analysis context | `/chatdata:onboard <project folder>` — inventory recent files and expose missing metric evidence |
 | Continue saved work | `/chatdata:resume <analysis folder>` — recheck evidence before reuse |
 | Check installation and linking | `/chatdata:status` |
 | See cached workflow totals and estimated value | `/chatdata:savings` |

@@ -1,6 +1,6 @@
 {
   "name": "chatdata",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
   "author": {
     "name": "Paras Doshi",
@@ -15,7 +15,7 @@
     "shortDescription": "Free data science skills with reproducible checks",
     "brandColor": "#D4F547",
     "defaultPrompt": [
-      "Use ChatData to investigate a metric change.",
+      "Use ChatData to onboard a project folder I choose and show missing metric evidence.",
       "Use ChatData to vet this experiment."
     ],
     "longDescription": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
