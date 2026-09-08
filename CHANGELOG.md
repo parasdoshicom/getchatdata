@@ -1,5 +1,9 @@
 # Changes
 
+## 1.6.2 — September 8, 2026
+
+- Made the required-link preflight read the client-specific `local_link` field from the offline status report, so every skill has an exact, machine-readable linked or unlinked decision before analysis starts.
+
 ## 1.6.1 — September 8, 2026
 
 - Replaced the dashboard's manual installation-token prompt with one email-linked command. Its single-use setup code expires after 20 minutes and is exchanged automatically for a revocable local credential.

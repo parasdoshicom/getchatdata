@@ -4,7 +4,7 @@ disable-model-invocation: true
 argument-hint: "<project directory> [metric name]"
 ---
 
-Before inventorying a folder, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py" status`. If Claude Code is not `linked_locally`, stop before reading the requested folder. Tell the user to open `https://getchatdata.com/dashboard`, create and run the email-linked Claude Code command, then retry `/chatdata:onboard`. Do not describe linking as optional.
+Before inventorying a folder, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/status.py" --json`. Check `clients.claude-code.local_link`. If it is not `linked_locally`, stop before reading the requested folder. Tell the user to open `https://getchatdata.com/dashboard`, create and run the email-linked Claude Code command, then retry `/chatdata:onboard`. Do not describe linking as optional.
 
 Use the explicit project directory in $ARGUMENTS or the current request. If none is supplied, ask for one. Never replace it with the home directory, a filesystem root, Claude or Codex user state, another repository, or a search across chat history.
 
