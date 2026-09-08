@@ -16,3 +16,5 @@ Update the installed ChatData plugin through Claude Code's native marketplace. D
 7. If every installed scope updated successfully, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/update-check.py" clear`. Then run `claude plugin list --json` again. Require exactly one `chatdata@chatdata-free` entry for every retained scope, no extra matching scopes, and a stable numeric `major.minor.patch` version for each entry. Report every exact scope and version. If an expected scope is missing, duplicated, unrecognized, or lacks a valid version, report that verification failed and do not claim that every scope updated.
 
 After success, tell the user to run `/reload-plugins` to use the update in this session, or restart Claude Code. A running session keeps the old plugin code until it reloads. If any step fails, report that step and its concise error; do not claim the update succeeded.
+
+After the user reloads or restarts Claude Code, suggest `/chatdata:status` to verify the loaded version and link state. A successful file update alone does not prove the running session has reloaded.

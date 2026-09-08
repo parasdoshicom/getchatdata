@@ -29,3 +29,9 @@ The user chooses what to keep. The plugin does not automatically synchronize rec
 Bring one CSV, one SQL query, or one experiment readout. Tell the agent what decision you need to make. It should inspect what you supplied and ask only for missing information that changes the answer. Read-only access is the default for connected sources; launching experiments, uploads and production changes require specific authorization.
 
 For updates and setup errors, use the [public installation guide](https://github.com/parasdoshicom/getchatdata#install).
+
+## Quick checks without losing your place
+
+In Claude Code, use `/chatdata:savings` for your cached workflow totals and `/chatdata:resume <analysis folder>` to pick up a saved record. In Codex or Cursor, ask the installed ChatData skill to show local status or resume the specific folder. The shared helper `python3 "<resolved plugin root>/scripts/status.py"` reports link state, pending events, and the next useful step without reading your conversations or sending a request. `--check` also runs the synthetic checks.
+
+The footer distinguishes an unlinked Claude installation, a linked account needing a time baseline, and cached savings. Pending events and old snapshots are labeled. A token saved locally is not proof that the server still accepts it; refresh via the dashboard or explicitly sync usage to check.

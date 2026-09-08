@@ -1,23 +1,17 @@
 ---
-description: Verify ChatData setup, local helper checks, and personal usage-reporting status.
+description: Show what is installed, what is linked locally, and the next useful setup step.
 ---
 
-This command belongs to the free ChatData plugin at `${CLAUDE_PLUGIN_ROOT}`. Use only this resolved installation. Read `${CLAUDE_PLUGIN_ROOT}/scripts/package-info.json` and list `${CLAUDE_PLUGIN_ROOT}/skills/`.
+This command belongs to the free ChatData plugin at `${CLAUDE_PLUGIN_ROOT}`. Use only this resolved installation. Confirm that `${CLAUDE_PLUGIN_ROOT}/scripts/status.py` exists. Do not search for another installation or inspect any installation token.
 
 Check Python 3.9+ availability, then run exactly:
 
 ```sh
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py"
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/status.py" --check
 ```
 
-Then inspect the local usage-reporting state:
+Claude substitutes the plugin root in this command content. Do not rely on the current working directory or a shell environment variable. If the root is unresolved or the file is absent, stop and report that exact setup failure. Do not install dependencies, change settings, connect an account, flush events, or make a network request while checking status.
 
-```sh
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py" status
-```
+Relay the report in plain language, including its suggested next step. "Linked locally" only means this computer has an installation credential. The offline report does not confirm that the server still accepts it. A cached dashboard timestamp comes from the last successful response and is not a live connection check. The three optional helper checks use bundled synthetic data; they do not prove client skill discovery, connected data, or answer quality.
 
-Claude substitutes the plugin root in this command content. Do not rely on the current working directory or a shell environment variable. If the root is unresolved or the file is absent, stop and report that exact setup failure. Never search the home directory or another ChatData installation, fall back to hosted MCP instructions, invent a fixture, or replace the doctor with an ad hoc calculation. Do not install dependencies or change client settings.
-
-Report the observed version, the three check results, whether this installation is linked, the locally queued event count, and whether the cached account summary has configured estimates. Do not print or search for an installation token. A passing helper check proves local calculations only; confirm the selected ChatData skill is available in this session separately. Do not claim connected data works or that all model answers are correct. If a step fails, state the exact failure and a targeted repair.
-
-Explain that all 16 skills remain free and work without hosted MCP or linked reporting; AI client fees can apply. The official download uses a personal account, and linking this installation to the usage dashboard is a separate consent step. If no data was supplied, offer the mix-shift example as the first task. When the user asks to run the example, read `${CLAUDE_PLUGIN_ROOT}/skills/root-cause/SKILL.md` and `${CLAUDE_PLUGIN_ROOT}/examples/mix-shift.csv`. Run `${CLAUDE_PLUGIN_ROOT}/scripts/analyze.py` on that exact CSV, explain why the rate changed, and save an analysis record in their chosen folder. If an earlier setup step failed, do not manufacture a successful example or record. On the next session, point the agent at that record and recheck freshness before reuse. Show the installed version instead of inventing the latest release.
+All 16 skills remain free and work without usage reporting; AI client fees can apply. If the report says the time baseline is missing, explain that the user sets their usual minutes per workflow and that ChatData starts at $125/hour unless they change it. If there are queued events, show the exact flush command from the report but do not run it without a separate request. If no data was supplied, offer the bundled mix-shift example as the first task. Show the installed version instead of inventing the latest release.

@@ -1,5 +1,14 @@
 # Changes
 
+## 1.5.0 — September 7, 2026
+
+- Added a read-only local status report with link state, cached usage, pending events, and a useful next step. Use `status.py --check` to include the synthetic setup checks.
+- The Claude footer distinguishes unlinked reporting, a missing time baseline, and cached estimates. It labels pending events and old summaries instead of treating them as live totals.
+- Added `/chatdata:help` for quick command discovery and re-established local record review guidance after compaction. Interrupted Claude workflows no longer count as completed.
+- Added `/chatdata:savings` for cached usage and `/chatdata:resume <analysis folder>` for continuing a specific local analysis after checking its evidence and freshness.
+- Updated first-run guidance for standard dashboard linking and the editable $125/hour default. All 16 data-science skills remain free.
+- No conversation-history scanning, new telemetry fields, remote analysis storage, or background uploads were added.
+
 ## 1.4.1 — September 7, 2026
 
 - Made dashboard linking part of the standard website setup, with a visible usage notice and a combined install-and-link command.

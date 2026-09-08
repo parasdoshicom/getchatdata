@@ -221,7 +221,7 @@ class UpdateTests(unittest.TestCase):
             input="{}", text=True, capture_output=True, check=True,
             env={**os.environ, "CHATDATA_HOME": str(self.root)},
         )
-        self.assertIn("usage estimates unavailable", malformed_summary.stdout)
+        self.assertIn("usage not linked", malformed_summary.stdout)
 
         (self.root / "individual-telemetry-summary.json").write_text(json.dumps({
             "estimates_configured": True,
@@ -235,7 +235,7 @@ class UpdateTests(unittest.TestCase):
             env={**os.environ, "CHATDATA_HOME": str(self.root)},
         )
         self.assertNotIn("999", oversized_summary.stdout)
-        self.assertIn("set your baseline", oversized_summary.stdout)
+        self.assertIn("usage not linked", oversized_summary.stdout)
 
     def test_prior_statusline_is_never_executed_or_displayed(self):
         self.root.mkdir(parents=True)

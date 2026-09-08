@@ -313,13 +313,14 @@ class TelemetryTests(unittest.TestCase):
         current = json.loads(self.settings.read_text())
         self.assertTrue(enabled["preserved_existing"])
         self.assertNotEqual(current["statusLine"]["command"], original["command"])
+        self.link("claude-code")
         T._write_json(T.paths()["summary"], SUMMARY)
         completed = subprocess.run([sys.executable, str(T.paths()["statusline"])], input="{}",
                                    text=True, capture_output=True, check=True,
                                    env={**os.environ, "CHATDATA_HOME": str(T.paths()["root"])})
         self.assertNotIn("WOZ saved", completed.stdout)
-        self.assertIn("1.2h estimated saved", completed.stdout)
-        self.assertIn("$187.50 estimated value", completed.stdout)
+        self.assertIn("1.2h est. saved", completed.stdout)
+        self.assertIn("$187.50 est. value", completed.stdout)
         result = T.restore_statusline()
         restored = json.loads(self.settings.read_text())
         self.assertTrue(result["restored"])

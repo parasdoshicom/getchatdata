@@ -336,3 +336,9 @@ For tested client versions, actual workflow results, and remaining limits, see [
 ## Contribute
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Bring a reproducible analytical failure, a synthetic fixture, or a better method with a source. Keep the release free of license checks and paid-feature dependencies, and keep usage events within the documented content-free schema. [MIT license](LICENSE).
+
+## Stay oriented while you work
+
+In Claude Code, `/chatdata:status` checks setup, `/chatdata:savings` shows cached workflow totals, and `/chatdata:resume <analysis folder>` picks up a local record after checking what changed. The footer distinguishes disconnected reporting, a missing time baseline, and cached estimates. Update notices still point to `/chatdata:update`.
+
+In Codex and Cursor, ask the loaded ChatData data-science skill to show local status or resume the analysis folder you specify. The shared `scripts/status.py` helper makes no network requests and never prints your installation token. Add `--check` to run the bundled synthetic checks. Savings are estimated time value, not savings on your AI bill. The dashboard starts at $125/hour; choose your usual time per workflow and adjust the hourly value if needed.

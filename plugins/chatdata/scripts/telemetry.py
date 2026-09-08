@@ -508,6 +508,8 @@ def claude_hook():
                     installation = _installation_config("claude-code")
                     _write_queue(queued + [{"installation_key": _installation_key(installation["token"]),
                                              "event": event}])
+        elif event_name == "StopFailure":
+            active.pop(key, None)
         elif event_name == "Stop":
             item = active.pop(key, None)
             if isinstance(item, dict) and item.get("skill_id") in SKILLS:

@@ -7,26 +7,38 @@
           {
             "type": "command",
             "command": "node",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js"
+            ],
             "timeout": 5
           },
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/footer.py", "session-start"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/footer.py",
+              "session-start"
+            ],
             "timeout": 2
           },
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py", "flush", "--silent"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py",
+              "flush",
+              "--silent"
+            ],
             "timeout": 5,
             "async": true
           },
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/update-check.py", "hook"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/update-check.py",
+              "hook"
+            ],
             "timeout": 2
           }
         ]
@@ -39,7 +51,10 @@
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py", "claude-hook"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py",
+              "claude-hook"
+            ],
             "timeout": 3
           }
         ]
@@ -52,7 +67,10 @@
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py", "claude-hook"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py",
+              "claude-hook"
+            ],
             "timeout": 3
           }
         ]
@@ -64,8 +82,26 @@
           {
             "type": "command",
             "command": "python3",
-            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py", "claude-hook"],
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py",
+              "claude-hook"
+            ],
             "timeout": 5
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": [
+              "${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py",
+              "claude-hook"
+            ],
+            "timeout": 3
           }
         ]
       }
