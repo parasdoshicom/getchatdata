@@ -1,5 +1,12 @@
 # Changes
 
+## 1.7.1 — September 8, 2026
+
+- Made ordinary analysis requests route to one relevant ChatData skill automatically, so users do not need to know a slash command before getting the method.
+- Made supported CSV funnels run the bundled checker before reporting counts. Immature entrants must stay out of primary denominators, and a failed checker can no longer be silently replaced with hand-written arithmetic presented as verified.
+- Added an eight-case Claude Code comparison harness with fresh fixtures, preserved transcripts, blind final-answer grading, plugin-inventory checks, and isolated test telemetry. Personal plugins, MCP servers, settings, and production usage accounts do not enter the experiment.
+- In three clean synthetic funnel comparisons, Claude Sonnet with ChatData selected the funnel skill, ran the bundled helper, and passed every rubric item; the three baseline runs treated an immature entrant as a non-converter and failed. This is one known case, not a general performance or productivity claim.
+
 ## 1.7.0 — September 8, 2026
 
 - Added a deterministic retention check that fixes cohort membership and denominators, deduplicates returns, uses explicit calendar boundaries, and leaves immature periods unobserved.

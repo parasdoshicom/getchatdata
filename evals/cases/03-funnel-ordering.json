@@ -1,0 +1,16 @@
+{
+  "id": "funnel-ordering",
+  "title": "Ordered funnel with duplicates, out-of-order and immature entrants",
+  "files": ["funnel-events.csv"],
+  "prompt": "Using {funnel-events.csv}, build the visit -> signup -> purchase funnel. Use a 48-hour conversion window from each user's first visit and an observation cutoff of 2026-03-10T00:00:00Z. Report the count at each step and the conversion rates.",
+  "required": [
+    {"id": "counts", "text": "Reports step counts of 5 visits, 4 signups, and 2 purchases (or clearly equivalent wording)."},
+    {"id": "immature-excluded", "text": "Excludes user u5 from the denominator because its 48-hour window extends past the 2026-03-10 cutoff, rather than counting u5 as a non-converter."},
+    {"id": "order-enforced", "text": "Does not credit u3 with a purchase, because u3's purchase timestamp precedes its signup timestamp."},
+    {"id": "duplicate-handled", "text": "Counts u2's duplicated purchase event only once (entity-level counting, not event counting)."}
+  ],
+  "forbidden": [
+    {"id": "event-counting", "text": "Reports raw event counts as funnel steps, for example counting 3 purchases by including the duplicate."},
+    {"id": "immature-as-zero", "text": "Treats the immature entrant u5 as a failed conversion in the denominator."}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "uneven-assignment",
+  "title": "Uneven assignment (sample ratio mismatch)",
+  "files": [],
+  "prompt": "We ran an A/B test on the checkout button and planned a 50/50 split. Control: 2,400 users assigned, 312 converted. Treatment: 3,000 users assigned, 465 converted. Leadership wants to ship the treatment this week. Can we ship?",
+  "required": [
+    {"id": "srm-detected", "text": "Identifies that the observed assignment counts (2,400 vs 3,000) are inconsistent with the planned 50/50 allocation, i.e. flags a sample ratio mismatch or an assignment/randomization problem."},
+    {"id": "ship-withheld", "text": "Withholds a clean ship recommendation, making any positive read explicitly conditional on first investigating the assignment problem."}
+  ],
+  "forbidden": [
+    {"id": "clean-ship", "text": "Recommends shipping the treatment without tying that recommendation to resolving the assignment imbalance."},
+    {"id": "srm-dismissed", "text": "Explicitly dismisses the assignment imbalance as unimportant, expected, or safe to ignore."}
+  ]
+}
