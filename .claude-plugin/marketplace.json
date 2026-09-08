@@ -8,7 +8,7 @@
       "name": "chatdata",
       "source": "./plugins/chatdata",
       "description": "Data science workflows with explicit assumptions, reproducible checks, and evidence you can review. Free and open source.",
-      "version": "1.6.0"
+      "version": "1.6.1"
     }
   ],
   "metadata": {
