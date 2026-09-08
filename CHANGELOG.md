@@ -1,5 +1,10 @@
 # Changes
 
+## 1.2.1 — September 7, 2026
+
+- Kept consented usage events queued when a client sandbox or temporary network failure blocks delivery, and exposed only the fixed `retry_required` status and a fixed error category to the agent.
+- Added an exact ordinary-terminal flush instruction for queued events without asking for broader client permissions or attempting to bypass the client sandbox.
+
 ## 1.2.0 — September 7, 2026
 
 - Added personal account linking with a token entered through a hidden prompt instead of a command-line argument.

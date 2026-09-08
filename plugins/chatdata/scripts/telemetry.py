@@ -32,6 +32,14 @@ SKILLS = {
 CLIENTS = {"claude-code", "codex", "cursor", "other"}
 
 
+class DeliveryError(RuntimeError):
+    """A delivery failure with a fixed category safe to show to an agent."""
+
+    def __init__(self, category, message):
+        super().__init__(message)
+        self.category = category
+
+
 def home():
     return Path(os.environ.get("CHATDATA_HOME", str(Path.home() / ".chatdata")))
 
@@ -164,13 +172,27 @@ def _request(method, path, token, payload=None, timeout=3):
                                "User-Agent": "ChatData-individual/" + _version()})
     try:
         with urlopen(request, timeout=timeout) as response:
-            parsed = json.loads(response.read().decode("utf-8"))
+            raw_response = response.read().decode("utf-8")
     except HTTPError as error:
-        raise RuntimeError("ChatData usage service returned HTTP " + str(error.code)) from None
-    except (URLError, TimeoutError, OSError, ValueError):
-        raise RuntimeError("ChatData usage service is unavailable; usage remains queued locally.") from None
+        categories = {
+            400: "invalid_event",
+            401: "authorization_failed",
+            403: "authorization_failed",
+            429: "rate_limited",
+        }
+        category = categories.get(error.code, "service_error")
+        raise DeliveryError(category, "ChatData usage service returned HTTP " + str(error.code)) from None
+    except (URLError, TimeoutError, OSError, UnicodeError):
+        raise DeliveryError(
+            "network_unavailable",
+            "ChatData usage service is unavailable; usage remains queued locally.",
+        ) from None
+    try:
+        parsed = json.loads(raw_response)
+    except ValueError:
+        raise DeliveryError("invalid_response", "ChatData usage service returned an invalid response.") from None
     if not isinstance(parsed, dict) or parsed.get("ok") is not True:
-        raise RuntimeError("ChatData usage service returned an invalid response.")
+        raise DeliveryError("invalid_response", "ChatData usage service returned an invalid response.")
     return parsed
 
 
@@ -310,7 +332,8 @@ def flush(silent=False):
             _write_queue(current)
         queued = current
     if not queued:
-        return {"telemetry": "linked", "queued": 0}
+        return {"telemetry": "linked", "queued": 0, "sent": 0,
+                "delivery_status": "nothing_queued"}
     sent = 0
     failures = []
     for client, installation in config["installations"].items():
@@ -325,19 +348,32 @@ def flush(silent=False):
                                 {"schema_version": 1, "events": batch})
             handled = set(response.get("accepted_event_ids", [])) | set(response.get("duplicate_event_ids", []))
             if not handled.issuperset(event["event_id"] for event in batch):
-                raise RuntimeError("ChatData usage service did not acknowledge the full batch; it remains queued.")
+                raise DeliveryError(
+                    "invalid_response",
+                    "ChatData usage service did not acknowledge the full batch; it remains queued.",
+                )
             with _locked():
                 current = _queue_records()
                 _write_queue([record for record in current
                               if record["event"].get("event_id") not in handled])
             _summary_from_response(response)
             sent += len(batch)
+        except DeliveryError as error:
+            failures.append((error.category, str(error)))
         except RuntimeError as error:
-            failures.append(str(error))
+            failures.append(("service_error", str(error)))
     remaining = len(_queue_records())
     if failures and not silent:
-        raise RuntimeError(failures[0])
-    return {"telemetry": "linked", "queued": remaining, "sent": sent}
+        raise DeliveryError(failures[0][0], failures[0][1])
+    result = {
+        "telemetry": "linked",
+        "queued": remaining,
+        "sent": sent,
+        "delivery_status": "retry_required" if failures else "delivered",
+    }
+    if failures:
+        result["error_category"] = failures[0][0]
+    return result
 
 
 def _event(event_type, workflow_id, client, skill_id, elapsed_seconds=None):
@@ -627,7 +663,8 @@ def main():
     end.add_argument("--skill-id", choices=sorted(SKILLS), required=True)
     end.add_argument("--elapsed-seconds", type=int)
     end.add_argument("--no-flush", action="store_true")
-    commands.add_parser("flush")
+    flush_command = commands.add_parser("flush")
+    flush_command.add_argument("--silent", action="store_true")
     commands.add_parser("status")
     hook = commands.add_parser("claude-hook")
     unlink = commands.add_parser("disconnect")
@@ -642,7 +679,7 @@ def main():
             result = complete(args.workflow_id, args.client, args.skill_id,
                               args.elapsed_seconds, args.no_flush)
         elif args.command == "flush":
-            result = flush()
+            result = flush(args.silent)
         elif args.command == "status":
             result = status()
         elif args.command == "disconnect":

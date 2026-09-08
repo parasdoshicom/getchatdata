@@ -124,7 +124,7 @@ ChatData copies and wraps the existing status-line command, including Woz or a c
 python3 plugins/chatdata/scripts/telemetry.py status
 ```
 
-If the service is temporarily unavailable, metadata waits in a local queue and retries later. Analysis continues. Each client's queue stays bound to the token that created it. If you replace a client's token, ChatData discards any unsent events for that earlier installation rather than attributing them to the new one. To disconnect this machine, run `python3 plugins/chatdata/scripts/telemetry.py disconnect`. Then revoke that installation token in the dashboard. Revoking one client token does not disconnect your other clients.
+If the service is temporarily unavailable, metadata waits in a local queue and retries later. Analysis continues. A silent client-side delivery attempt returns the fixed status `retry_required` and a fixed error category; it does not return request content or server error text. The agent should give you the exact `python3 "<resolved telemetry.py path>" flush` command to run in your ordinary terminal. It should not ask for broader client permissions or try to bypass a client sandbox. Each client's queue stays bound to the token that created it. If you replace a client's token, ChatData discards any unsent events for that earlier installation rather than attributing them to the new one. To disconnect this machine, run `python3 plugins/chatdata/scripts/telemetry.py disconnect`. Then revoke that installation token in the dashboard. Revoking one client token does not disconnect your other clients.
 
 ## First run: get one useful answer
 

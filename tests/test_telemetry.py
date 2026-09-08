@@ -60,6 +60,8 @@ class TelemetryTests(unittest.TestCase):
         stop = hooks["Stop"][0]["hooks"][0]
         self.assertNotIn("async", stop)
         self.assertEqual(stop["args"][-1], "claude-hook")
+        startup_flush = hooks["SessionStart"][0]["hooks"][1]
+        self.assertEqual(startup_flush["args"][-2:], ["flush", "--silent"])
 
     def test_connect_requires_consent_and_hides_token(self):
         remote = {"ok": True, "client": "codex", "consent_version": T.CONSENT_VERSION,
@@ -194,16 +196,28 @@ class TelemetryTests(unittest.TestCase):
         payload = request.call_args.args[3]
         self.assertEqual(set(payload), {"schema_version", "events"})
         self.assertEqual(result["sent"], 1)
+        self.assertEqual(result["delivery_status"], "delivered")
         self.assertEqual(T._queue_events(), [])
         self.assertEqual(T._read_json(T.paths()["summary"], {})["estimated_value_usd"], 187.5)
 
     def test_failed_delivery_keeps_queue(self):
         self.link()
         T.start("codex", "sql-review", no_flush=True)
-        with patch.object(T, "_request", side_effect=RuntimeError("offline")):
+        private_error = "private upstream detail must not be returned"
+        with patch.dict(os.environ, {"CHATDATA_API_ORIGIN": "http://127.0.0.1:4185"}), \
+             patch.object(T, "urlopen", side_effect=T.URLError(private_error)):
             result = T.flush(silent=True)
         self.assertEqual(result["sent"], 0)
+        self.assertEqual(result["delivery_status"], "retry_required")
+        self.assertEqual(result["error_category"], "network_unavailable")
+        self.assertNotIn(private_error, json.dumps(result))
         self.assertEqual(len(T._queue_events()), 1)
+
+    def test_working_agreement_gives_actionable_flush_without_permission_bypass(self):
+        agreement = (P / "references/working-agreement.md").read_text()
+        self.assertIn('python3 "<resolved telemetry.py path>" flush', agreement)
+        self.assertIn("Do not request broader client permissions", agreement)
+        self.assertIn("or retry automatically", agreement)
 
     def test_api_origin_refuses_non_chatdata_remote_host(self):
         with patch.dict(os.environ, {"CHATDATA_API_ORIGIN": "https://example.com"}):
