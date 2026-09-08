@@ -8,13 +8,19 @@ These checks validate the shipped code and structure. They are not a comparative
 
 ## Measured enforcement check
 
-Run `python3 evals/run_enforcement_eval.py`. It plants five known defects in synthetic inputs and requires the deterministic helpers to catch them: uneven experiment assignment, out-of-order or immature funnel events, composition mistaken for within-segment decline, immature retention, and join measure inflation. The checked-in result records five passes in release 1.7.0.
+Run `python3 evals/run_enforcement_eval.py`. It plants five known defects in synthetic inputs and requires the deterministic helpers to catch them: uneven experiment assignment, out-of-order or immature funnel events, composition mistaken for within-segment decline, immature retention, and join measure inflation. The checked-in result records five passes for the current release.
+
+For a model-level comparison, run the staged harness in [`evals/README.md`](../evals/README.md). It gives Claude Code the same prompt and built-in tools in both arms, adds the ChatData plugin only to the treatment arm, preserves original transcripts, and blind-grades final-answer reviewer copies. The harness isolates personal settings, plugins, MCP servers, session history, and production ChatData usage state. Treat small synthetic runs as diagnostic evidence, not a general accuracy or productivity claim.
 
 This result shows that the named code paths catch those exact fixtures. It does not measure how often an AI chooses the right skill, whether the model follows prose, real-world accuracy, or time saved.
 
 ## Blinded model comparison
 
-The runnable [comparison harness](../evals/model-comparison/README.md) pairs fresh ChatData and unguided sessions on the eight cases below, randomizes the outputs, and keeps the condition key separate from the reviewer score sheet. It rejects incomplete scoring and reports paired wins after the reviewer has made every pass/fail judgment. No completed head-to-head score is published yet; publishing a number requires the full prompts, outputs, model and client versions, scoring notes, elapsed time, and provider-reported cost.
+The runnable [Claude Code harness](../evals/README.md) pairs fresh ChatData and unguided sessions on the eight cases below, preserves the raw event streams and executed configuration, and blind-grades the final answers after masking package-identifying text. It rejects incomplete scoring and separately retains tool activity for method and safety checks.
+
+The checked-in [funnel result](../evals/results/claude-funnel-v1.7.1.md) is deliberately narrow: three fresh Claude Sonnet sessions per arm on one known synthetic defect. All three ChatData sessions selected the funnel skill, ran the bundled checker, and passed; all three unguided sessions included an immature entrant in their primary denominator and failed. This does not establish a general accuracy rate or productivity claim.
+
+The older [manual comparison kit](../evals/model-comparison/README.md) remains available for independent human review. Any published result should include the prompts, outputs, model and client versions, scoring notes, elapsed time, provider-reported cost, and the limits of the sample.
 
 ## Model review cases
 

@@ -146,7 +146,14 @@ class PackagingTests(unittest.TestCase):
         context=json.loads(r.stdout)['hookSpecificOutput']['additionalContext']
         self.assertIn('ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'],context)
         self.assertIn('Dashboard linking is required for ChatData analysis',context)
+        self.assertIn('For every analysis request, invoke the one relevant ChatData skill',context)
         self.assertNotIn('skills still work locally if reporting is disconnected',context)
+
+    def test_funnel_skill_requires_checked_helper_and_mature_denominators(self):
+        text=(P/'skills/funnel-analysis/SKILL.md').read_text()
+        self.assertIn('run `../../scripts/analyze.py funnel` before reporting counts',text)
+        self.assertIn('Exclude those immature entrants from every primary denominator',text)
+        self.assertIn('Do not silently replace it with ad hoc arithmetic',text)
 
     def test_readme_uses_dashboard_linking_without_legacy_prompt_commands(self):
         readme=(ROOT/'README.md').read_text()

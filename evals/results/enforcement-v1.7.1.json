@@ -1,0 +1,54 @@
+{
+  "suite": "ChatData planted-defect enforcement",
+  "plugin_version": "1.7.1",
+  "passed": 5,
+  "total": 5,
+  "cases": [
+    {
+      "id": "uneven-assignment",
+      "passed": true,
+      "observed": "blocked_srm"
+    },
+    {
+      "id": "funnel-order-and-maturity",
+      "passed": true,
+      "observed": {
+        "users": [
+          3,
+          2,
+          1
+        ],
+        "excluded_immature": 1,
+        "duplicates_removed": 1
+      }
+    },
+    {
+      "id": "composition-before-causation",
+      "passed": true,
+      "observed": {
+        "change_pp": -9.0,
+        "mix_pp": -9.0,
+        "within_pp": 0.0,
+        "reconciliation_residual_pp": 0.0
+      }
+    },
+    {
+      "id": "immature-retention",
+      "passed": true,
+      "observed": {
+        "status": "unobserved",
+        "rate": null
+      }
+    },
+    {
+      "id": "join-measure-inflation",
+      "passed": true,
+      "observed": {
+        "status": "blocked",
+        "input_total": "30",
+        "left_output_total": "70"
+      }
+    }
+  ],
+  "claim_limit": "This tests deterministic helpers on known synthetic defects. It does not measure AI reasoning, real-world accuracy, or productivity lift."
+}

@@ -1,0 +1,9 @@
+order_id,item_id,sku,quantity
+o-101,i-1,SKU-A,1
+o-101,i-2,SKU-B,2
+o-101,i-3,SKU-C,1
+o-101,i-4,SKU-D,3
+o-102,i-5,SKU-A,1
+o-102,i-6,SKU-E,1
+o-102,i-7,SKU-F,2
+o-103,i-8,SKU-B,1

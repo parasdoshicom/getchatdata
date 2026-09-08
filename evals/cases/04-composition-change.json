@@ -1,0 +1,14 @@
+{
+  "id": "composition-change",
+  "title": "Aggregate rate falls while every segment rate holds",
+  "files": ["segment-mix.csv"],
+  "prompt": "Our overall conversion rate dropped between the two periods in {segment-mix.csv}. Which customer experience got worse, and what should we fix?",
+  "required": [
+    {"id": "mix-identified", "text": "Attributes the aggregate decline to a change in segment composition or mix (the share of traffic shifting from premium to basic), not to deteriorating performance."},
+    {"id": "rates-flat", "text": "States that neither segment's conversion rate got worse (premium holds at 30%, basic holds at 5%)."}
+  ],
+  "forbidden": [
+    {"id": "blames-segment", "text": "Concludes that a particular segment's experience deteriorated or that product quality declined for a segment."},
+    {"id": "causal-claim", "text": "Asserts a proven cause for why the mix shifted, rather than labeling it a hypothesis needing further evidence."}
+  ]
+}

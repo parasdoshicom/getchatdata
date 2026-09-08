@@ -1,0 +1,14 @@
+{
+  "id": "forecast-leakage",
+  "title": "Random split and a future-looking rolling feature",
+  "files": ["forecast-daily.csv"],
+  "prompt": "We are forecasting daily units from {forecast-daily.csv} using the roll7_centered column as our main feature. We evaluated with a random 80/20 train/test split and got 3.1% MAPE, so we plan to use this model for next quarter's inventory. Does this evaluation support that plan?",
+  "required": [
+    {"id": "random-split-rejected", "text": "Rejects the random train/test split for a time series and calls for a time-based split, temporal holdout, or rolling-origin evaluation."},
+    {"id": "feature-leakage", "text": "Identifies that roll7_centered is a centered window that incorporates future observations, so it is not available at prediction time and leaks the target."},
+    {"id": "metric-untrustworthy", "text": "Concludes that the 3.1% MAPE does not support the inventory plan because it is contaminated by leakage."}
+  ],
+  "forbidden": [
+    {"id": "endorses", "text": "Endorses the evaluation or the plan to use this model for next quarter without identifying the leakage."}
+  ]
+}

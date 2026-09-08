@@ -1,0 +1,437 @@
+{
+  "schema_version": 1,
+  "run_date": "2026-09-08",
+  "case": "funnel-ordering",
+  "fixture": "evals/fixtures/funnel-events.csv",
+  "fixture_sha256": "972beb5a505fab3fcdcabb55d45233c2db7d75e2547bdbc935f6e9708a5db0d0",
+  "prompt": "Using {funnel-events.csv}, build the visit -> signup -> purchase funnel. Use a 48-hour conversion window from each user's first visit and an observation cutoff of 2026-03-10T00:00:00Z. Report the count at each step and the conversion rates.",
+  "runs": [
+    {
+      "arm": "baseline",
+      "repeat": 0,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 24.5,
+      "provider_reported_cost_usd": 0.041794,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"head -20 <synthetic-workdir>/funnel-events.csv; echo \\\"---\\\"; wc -l <synthetic-workdir>/funnel-events.csv\", \"description\": \"Inspect CSV\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/funnel-events.csv\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 << 'EOF'\\nimport csv\\nfrom datetime import datetime, timedelta\\nrows=list(csv.DictReader(open('funnel-events.csv')))\\ndef p(s): return datetime.fromisoformat(s.replace('Z','+00:00'))\\ncut=p('2026-03-10T00:00:00Z')\\nfrom collections import defaultdict\\nev=defaultdict(list)\\nfor r in rows:\\n    ev[r['user_id']].append((r['event'],p(r['timestamp'])))\\n\\nvisit=signup=purchase=0\\nfor u,es in ev.items():\\n    es=[e for e in es if e[1]<=cut]\\n    vs=[t for k,t in es if k=='visit']\\n    if not vs: continue\\n    fv=min(vs)\\n    win=fv+timedelta(hours=48)\\n    visit+=1\\n    ss=[t for k,t in es if k=='signup' and fv<=t<=win]\\n    if not ss: continue\\n    fs=min(ss)\\n    signup+=1\\n    ps=[t for k,t in es if k=='purchase' and fs<=t<=win]\\n    if not ps: continue\\n    purchase+=1\\n\\nprint(\\\"visit\\\",visit)\\nprint(\\\"signup\\\",signup, f\\\"{signup/visit:.1%}\\\")\\nprint(\\\"purchase\\\",purchase, f\\\"{purchase/signup:.1%}\\\", f\\\"overall {purchase/visit:.1%}\\\")\\nEOF\", \"description\": \"Compute funnel\"}"
+        }
+      ],
+      "answer": "## Funnel results\n\n**Window:** 48h from each user's first visit \u00b7 **Cutoff:** 2026-03-10T00:00:00Z (events after excluded) \u00b7 Ordered steps (each step must occur after the prior step's timestamp, within the window).\n\n| Step | Count | Step conversion | Overall (from visit) |\n|------|-------|-----------------|----------------------|\n| Visit | 6 | \u2014 | 100% |\n| Signup | 5 | 83.3% | 83.3% |\n| Purchase | 2 | 40.0% | 33.3% |\n\n### Per-user trace (6 users total)\n- **u1** \u2013 visit\u2192signup(+2h)\u2192purchase(+5h): full conversion \u2705\n- **u2** \u2013 visit\u2192signup(+1h)\u2192purchase(+3h): full conversion \u2705 (duplicate purchase row ignored)\n- **u3** \u2013 signup counts (+2h), but purchase (+1h) precedes signup \u2192 drops at purchase\n- **u4** \u2013 signup at +30h (within 48h) counts; no purchase\n- **u5** \u2013 visit/signup on 03-09 within window and before cutoff; no purchase\n- **u6** \u2013 visit only\n\nNote: u5's events fall just before the cutoff and are included; any events dated after 2026-03-10T00:00:00Z would be excluded (none here).",
+      "grade": {
+        "required": {
+          "counts": false,
+          "immature-excluded": false,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": true
+        },
+        "reason": "Analyst included u5 in visit/signup counts (6/5/2 instead of 5/4/2), treating the immature entrant as a non-converter. Order enforcement and duplicate handling done correctly.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      }
+    },
+    {
+      "arm": "baseline",
+      "repeat": 1,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 25.2,
+      "provider_reported_cost_usd": 0.036198,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"head -20 <synthetic-workdir>/funnel-events.csv; echo \\\"---\\\"; wc -l <synthetic-workdir>/funnel-events.csv\", \"description\": \"Inspect CSV\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/funnel-events.csv\"}"
+        }
+      ],
+      "answer": "## Funnel results\n\n| Step | Count | Step conversion | From top of funnel |\n|---|---|---|---|\n| Visit | 6 | \u2014 | 100% |\n| Signup | 5 | 83.3% (5/6) | 83.3% |\n| Purchase | 2 | 40.0% (2/5) | 33.3% (2/6) |\n\n### Method\n- One row per user per step; steps must occur **strictly in order** (visit \u2192 signup \u2192 purchase), each after the previous step's timestamp.\n- Signup and purchase must fall within **48h of the user's first visit** and at/before the cutoff **2026-03-10T00:00:00Z**.\n- Duplicate events collapsed.\n\n### Per-user outcome\n| User | First visit | Result | Reason |\n|---|---|---|---|\n| u1 | 03-01 00:00 | purchase | signup +2h, purchase +5h |\n| u2 | 03-02 00:00 | purchase | signup +1h, purchase +3h (dup purchase ignored) |\n| u3 | 03-03 00:00 | signup | purchase (01:00) precedes signup (02:00) \u2192 no valid purchase |\n| u4 | 03-04 00:00 | signup | signup +30h; no purchase |\n| u5 | 03-09 12:00 | signup | signup +1h (before cutoff); no purchase |\n| u6 | 03-05 00:00 | visit | no further events |",
+      "grade": {
+        "required": {
+          "counts": false,
+          "immature-excluded": false,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": true
+        },
+        "reason": "Analyst kept u5 in the funnel (6 visits, 5 signups, 2 purchases), counting u5 as a signup-stage non-converter rather than excluding it as immature. Order and duplicate handling correct.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      }
+    },
+    {
+      "arm": "baseline",
+      "repeat": 2,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 25.9,
+      "provider_reported_cost_usd": 0.03755,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/funnel-events.csv\", \"limit\": 30}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"cat <synthetic-workdir>/funnel-events.csv\", \"description\": \"show full file\"}"
+        }
+      ],
+      "answer": "## Funnel results\n\n| Step | Count | Conversion from previous | Conversion from top |\n|---|---|---|---|\n| Visit | 6 | \u2014 | 100% |\n| Signup | 5 | 83.3% | 83.3% |\n| Purchase | 2 | 40.0% | 33.3% |\n\n### How each user resolves (48h window from first visit, events ordered visit \u2192 signup \u2192 purchase, cutoff 2026\u201103\u201110T00:00:00Z)\n\n- **u1** \u2014 visit \u2192 signup (+2h) \u2192 purchase (+5h). Full funnel \u2713\n- **u2** \u2014 visit \u2192 signup (+1h) \u2192 purchase (+3h). Full funnel \u2713 (duplicate purchase ignored)\n- **u3** \u2014 visit \u2192 signup (+2h) \u2713, but the only purchase (+1h) occurs *before* signup, so no valid ordered purchase. Stops at signup.\n- **u4** \u2014 visit \u2192 signup (+30h, within window) \u2713. No purchase. Stops at signup.\n- **u5** \u2014 visit \u2192 signup (+1h) \u2713. No purchase. Stops at signup.\n- **u6** \u2014 visit only.\n\n### Caveat on u5 (right\u2011censoring)\n\nu5 first visited 2026\u201103\u201109T12:00Z, so their 48h window runs to 2026\u201103\u201111T12:00Z \u2014 past the observation cutoff. They still had time to purchase that we can't observe. If you exclude censored users from the purchase-step denominator, signup\u2192purchase becomes 2/4 = 50% and overall visit\u2192purchase is 2/5 = 40%.",
+      "grade": {
+        "required": {
+          "counts": false,
+          "immature-excluded": false,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": true
+        },
+        "reason": "Headline funnel is 6/5/2, counting u5 and u6 as non-converters; correct 5/4/2 exclusion only appears as a conditional caveat, not the reported answer. Order and duplicate handling correct.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      }
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 0,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 32.8,
+      "provider_reported_cost_usd": 0.059218,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.1"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:funnel-analysis\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"head -5 <synthetic-workdir>/funnel-events.csv; echo ---; wc -l <synthetic-workdir>/funnel-events.csv; echo ---; python3 <chatdata-plugin>/scripts/analyze.py funnel --help\", \"description\": \"Inspect CSV and helper\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"cd <synthetic-workdir> && cat funnel-events.csv && echo === && python3 <chatdata-plugin>/scripts/analyze.py funnel funnel-events.csv --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\", \"description\": \"Run funnel analysis\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"cd <synthetic-workdir> && python3 <chatdata-plugin>/scripts/analyze.py funnel funnel-events.csv --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\", \"description\": \"Run funnel helper\"}"
+        }
+      ],
+      "answer": "## Visit \u2192 Signup \u2192 Purchase Funnel\n\n**Definition:** Closed, strictly-ordered, user-level funnel. Entry = each user's earliest `visit`. Each subsequent step must occur at a strictly later timestamp than the prior step and within **48 hours of first visit**. Observation cutoff (`--as-of`) = 2026-03-10T00:00:00Z. Verified with the ChatData funnel helper (input sha256 `972beb5a\u2026`).\n\n### Exclusions (before counting)\n| Reason | Count | Detail |\n|---|---|---|\n| Immature entry window | 1 | u5 first visit 2026-03-09T12:00Z; 48h window ends 2026-03-11T12:00Z, after cutoff |\n| Duplicate events removed | 1 | u2 repeated `purchase` at identical timestamp |\n| Users without entry event | 0 | |\n| Future / post-cutoff events | 0 | |\n\n**Mature entry cohort: 5 users** (u1, u2, u3, u4, u6).\n\n### Step table\n| Step | Users | Conv. from entry | Conv. from previous | Lost from previous |\n|---|---|---|---|---|\n| visit | 5 | 100% | 100% | \u2014 |\n| signup | 4 | 80% | 80% | 1 (u6 never signs up) |\n| purchase | 2 | 40% | 50% | 2 |\n\nNote on the drop to purchase: u4 has no purchase; **u3 purchased *before* signing up**, so it fails the strict-order rule and does not count as a converted purchase. If step order were not enforced, purchase would be 3 (60% from entry).\n\n### Highest-value diagnostic next query\nInvestigate the signup\u2192purchase step: 2 of 4 signups stall. Pull time-to-convert and event sequences for signed-up non-purchasers (u3, u4) to see whether it's an ordering/tracking issue (u3-style out-of-order events) versus genuine drop-off (u4). If out-of-order purchases are common, revisit whether the funnel should be order-enforced.\n\n### Rerunnable command\n```\npython3 <chatdata-plugin>/scripts/analyze.py funnel \\\n  funnel-events.csv --steps visit signup purchase \\\n  --as-of 2026-03-10T00:00:00Z --window-hours 48\n```\n\nCausal notes above (tracking vs. real drop-off) are hypotheses, not established.",
+      "grade": {
+        "required": {
+          "counts": true,
+          "immature-excluded": true,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": false
+        },
+        "reason": "Reports 5/4/2 counts, excludes u5 as immature from denominator, denies u3 credit for out-of-order purchase, and dedupes u2's duplicate purchase.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": true
+      }
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 1,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 37.8,
+      "provider_reported_cost_usd": 0.076523,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.1"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:funnel-analysis\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"head -20 <synthetic-workdir>/funnel-events.csv; echo ---; wc -l <synthetic-workdir>/funnel-events.csv\", \"description\": \"Preview funnel CSV\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<chatdata-plugin>/references/tools.md\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"tail -n +14 <synthetic-workdir>/funnel-events.csv; echo ===; python3 <chatdata-plugin>/scripts/analyze.py funnel <synthetic-workdir>/funnel-events.csv --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\", \"description\": \"Run funnel analysis\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"cat <synthetic-workdir>/funnel-events.csv\", \"description\": \"Show full CSV\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 <chatdata-plugin>/scripts/analyze.py funnel <synthetic-workdir>/funnel-events.csv --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\", \"description\": \"Run funnel helper\"}"
+        }
+      ],
+      "answer": "## Funnel: visit \u2192 signup \u2192 purchase\n\n**Definition:** Closed, strictly-ordered, user-level funnel. Entry = each user's earliest `visit`. Each subsequent step must occur *after* the previous step and within **48 hours** of first visit. Observation cutoff (`--as-of`) = 2026-03-10T00:00:00Z; users whose full 48h window hasn't elapsed by then are excluded.\n\n**Exclusions / data handling:**\n- **1 immature user excluded** (u5: first visit 2026-03-09T12:00Z, window closes after cutoff) \u2014 not in any denominator.\n- **1 duplicate event removed** (u2's repeated purchase).\n- **1 out-of-order purchase not credited** (u3 purchased before signing up).\n- 0 users without an entry event; 0 future events.\n\n### Step table (5 mature entrants: u1, u2, u3, u4, u6)\n\n| Step | Users | % of entry | % from previous | Lost from previous |\n|---|---|---|---|---|\n| visit | 5 | 100% | \u2014 | \u2014 |\n| signup | 4 | 80% | 80% | 1 (u6) |\n| purchase | 2 | 40% | 50% | 2 (u3 out-of-order, u4 no purchase) |\n\n**Conversion rates:** visit\u2192signup 80% \u00b7 signup\u2192purchase 50% \u00b7 overall visit\u2192purchase 40%.\n\n### Highest-value next query\nInvestigate the signup\u2192purchase drop (largest absolute loss, 2 of 4). Pull time-to-convert and the in-window event sequences for signed-up non-purchasers (u3, u4) to distinguish \"ran out of window\" from \"wrong order / abandoned checkout\" \u2014 u3 is purely an event-ordering artifact worth confirming in the raw tracking.\n\n### Rerun\n```sh\npython3 <chatdata-plugin>/scripts/analyze.py funnel \\\n  <synthetic-workdir>/funnel-events.csv \\\n  --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\n```\n\nCausal explanations above are hypotheses, not established effects.",
+      "grade": {
+        "required": {
+          "counts": true,
+          "immature-excluded": true,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": false
+        },
+        "reason": "Reports 5/4/2 counts, excludes u5 as immature, denies u3's out-of-order purchase, dedupes u2. No forbidden behaviors present.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": true
+      }
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 2,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.263",
+      "elapsed_seconds": 37.4,
+      "provider_reported_cost_usd": 0.089395,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.1"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:funnel-analysis\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<chatdata-plugin>/references/working-agreement.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<chatdata-plugin>/references/tools.md\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"head -5 <synthetic-workdir>/funnel-events.csv; wc -l <synthetic-workdir>/funnel-events.csv\", \"description\": \"Preview funnel CSV\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<chatdata-plugin>/scripts/status.py\\\" --json\", \"description\": \"Check ChatData link status\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<chatdata-plugin>/scripts/analyze.py\\\" funnel <synthetic-workdir>/funnel-events.csv --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\", \"description\": \"Run funnel analysis\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/funnel-events.csv\"}"
+        }
+      ],
+      "answer": "## Funnel: visit \u2192 signup \u2192 purchase\n\n**Definition:** Closed, strictly-ordered, user-level funnel. Entry = each user's first `visit`. A step counts only if it occurs after the prior step and within **48h of first visit**. Observation cutoff (`--as-of`) = 2026-03-10T00:00:00Z; users whose full 48h window extends past the cutoff are excluded. Verified with `analyze.py funnel` (ChatData 1.7.1), input sha256 `972beb5a\u2026`.\n\n**Data handling:** 6 users total. 1 excluded as immature (**u5**, visited 2026-03-09 12:00Z \u2014 window ends after cutoff). 1 duplicate `purchase` removed (u2). 0 events after cutoff. 0 users without an entry event.\n\n| Step | Users | % from first visit | % from previous step | Lost from previous |\n|---|---|---|---|---|\n| visit | 5 | 100% | 100% | \u2014 |\n| signup | 4 | 80% | 80% | 1 |\n| purchase | 2 | 40% | 50% | 2 |\n\nMature denominator = 5 (u1, u2, u3, u4, u6).\n\n**Notable drop drivers (hypotheses, n is tiny):**\n- **u3** signed up but its `purchase` timestamp precedes the signup, so it is not credited \u2014 an out-of-order event, possibly event-instrumentation ordering rather than real behavior.\n- **u4** signed up (~30h) but never purchased within the window.\n- **u6** visited only.\n\n**Highest-value next query:** pull the raw event stream for users who signed up but did not purchase (u3, u4), including all event types and client/device, to distinguish tracking artifacts (out-of-order events) from genuine checkout drop-off before investing in a purchase-step fix.\n\n**Rerun:**\n```sh\npython3 \"<chatdata-plugin>/scripts/analyze.py\" funnel \\\n  <synthetic-workdir>/funnel-events.csv \\\n  --steps visit signup purchase --as-of 2026-03-10T00:00:00Z --window-hours 48\n```\n\nCaveat: 5 mature users is far too small for stable rates \u2014 treat these as an illustration of the method, not a reliable conversion estimate.",
+      "grade": {
+        "required": {
+          "counts": true,
+          "immature-excluded": true,
+          "order-enforced": true,
+          "duplicate-handled": true
+        },
+        "forbidden": {
+          "event-counting": false,
+          "immature-as-zero": false
+        },
+        "reason": "All counts correct (5/4/2), u5 excluded as immature, u3 not credited due to out-of-order purchase, u2 duplicate counted once. No forbidden behaviors present.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": true
+      }
+    }
+  ],
+  "limits": [
+    "One known synthetic defect.",
+    "One prompt phrasing.",
+    "Claude Sonnet 5 in Claude Code 2.1.263 only.",
+    "LLM grades were spot-checked against answers and tool calls.",
+    "This does not measure general accuracy, time saved, or dollar savings."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "sparse-outcomes",
+  "title": "Sparse outcomes with a zero baseline",
+  "files": [],
+  "prompt": "Early read on an experiment. Control: 250 users assigned, 0 converted. Treatment: 250 users assigned, 6 converted. What is the lift and is the result significant?",
+  "required": [
+    {"id": "no-infinite-lift", "text": "Declines to report an infinite, undefined, or arbitrarily large relative lift, explaining that a zero control baseline makes relative lift undefined. Reporting the absolute difference (2.4 percentage points) instead satisfies this."},
+    {"id": "sparse-caution", "text": "States that the outcome counts are too sparse for ordinary large-sample inference to be decisive, or otherwise refuses to treat a normal-approximation p-value as proof."}
+  ],
+  "forbidden": [
+    {"id": "infinite-lift", "text": "Reports an infinite or undefined relative lift as if it were a real effect size."},
+    {"id": "decisive-claim", "text": "Declares the result statistically significant or conclusive on the basis of a normal-approximation test without qualifying the sparse counts."}
+  ]
+}

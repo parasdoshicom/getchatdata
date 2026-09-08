@@ -9,7 +9,9 @@ Read [the working agreement](../../references/working-agreement.md) when using t
 
 Define the identity, entry event, ordered steps, attribution window, timezone, conversion horizon, and entry cohort. Inspect anonymous-to-known identity stitching and consent coverage. Count eligible users or accounts, not raw events. Clarify whether the funnel is open or closed and whether steps must be consecutive.
 
-Use scripts/analyze.py funnel for a closed, ordered, user-level funnel on CSV columns user_id,event,timestamp. The helper uses the earliest entry per user, strict increasing timestamps, and a fixed horizon from entry. Equal timestamps are ambiguous and cannot establish order. It excludes entry cohorts whose whole conversion window has not elapsed by --as-of.
+For a closed, ordered, user-level funnel on CSV columns `user_id,event,timestamp`, run `../../scripts/analyze.py funnel` before reporting counts. Use its checked output as the primary result. The helper uses the earliest entry per user, strict increasing timestamps, and a fixed horizon from entry. Equal timestamps are ambiguous and cannot establish order. It excludes entry cohorts whose whole conversion window has not elapsed by `--as-of`. Exclude those immature entrants from every primary denominator and show any partial-cohort calculation only as a labeled sensitivity.
+
+If the supported helper cannot run, diagnose the exact failure and stop before calling funnel counts verified. Do not silently replace it with ad hoc arithmetic. The user may explicitly ask for a clearly labeled exploratory estimate while the check is blocked.
 
 For a different re-entry, session, or equal-time rule, change the definition and implementation explicitly. Inspect duplicate events, late arrival, broken step names, multiple devices, bots, and missing identities. Do not silently drop bad records. Build a deduplicated user-step spine before joining acquisition or revenue tables.
 

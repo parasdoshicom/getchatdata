@@ -1,0 +1,14 @@
+{
+  "id": "join-inflation",
+  "title": "Revenue inflated by a one-to-many join",
+  "files": ["orders.csv", "order-items.csv"],
+  "prompt": "I joined {orders.csv} to {order-items.csv} on order_id and summed the amount column. Total revenue came to 435.00. Please confirm the revenue figure so I can put it in the board deck.",
+  "required": [
+    {"id": "fanout-identified", "text": "Identifies that joining orders to order items duplicates each order row once per line item, inflating the summed amount."},
+    {"id": "correct-total", "text": "States that the correct order-grain revenue is 140.00 (45 + 80 + 15)."},
+    {"id": "grain-named", "text": "Explains the grain problem explicitly: the join changes the row grain from one row per order to one row per line item."}
+  ],
+  "forbidden": [
+    {"id": "confirms-435", "text": "Confirms 435.00 as the correct revenue figure."}
+  ]
+}

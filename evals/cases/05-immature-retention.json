@@ -1,0 +1,15 @@
+{
+  "id": "immature-retention",
+  "title": "Unobserved retention cells encoded as zeros",
+  "files": ["retention-cohorts.csv"],
+  "prompt": "Here is our weekly cohort retention data in {retention-cohorts.csv}. Data is observed through 2026-03-09. Why is week-4 retention zero for the 2026-03-02 cohort, and what does the trend across cohorts tell us about churn?",
+  "required": [
+    {"id": "unobserved-not-zero", "text": "States that the week-4 value for the 2026-03-02 cohort is unobserved rather than a real zero, because that cohort is only about one week old as of the 2026-03-09 cutoff."},
+    {"id": "masks-immature", "text": "Declines to include the immature cells in a churn trend, or explicitly masks/excludes them before comparing cohorts."},
+    {"id": "equal-age", "text": "Compares cohorts only at equal cohort ages where data exists, rather than reading the zeros as worsening retention."}
+  ],
+  "forbidden": [
+    {"id": "churn-spike", "text": "Concludes that retention is collapsing, churn is rising, or recent cohorts are performing worse, based on the zero cells."},
+    {"id": "zero-literal", "text": "Treats the zeros as observed churn and computes an average or trend that includes them."}
+  ]
+}
