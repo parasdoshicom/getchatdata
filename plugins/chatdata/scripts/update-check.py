@@ -21,7 +21,10 @@ MAX_RESPONSE_BYTES = 64 * 1024
 NETWORK_TIMEOUT_SECONDS = 1.25
 HOOK_WORKER_TIMEOUT_SECONDS = 1.6
 SEMVER = re.compile(r"^(?:v)?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
-WRAPPER_MARKER = b'#!/usr/bin/env python3\n"""Preserve an existing Claude status line and append ChatData estimates."""'
+WRAPPER_MARKERS = (
+    b'#!/usr/bin/env python3\n"""Preserve an existing Claude status line and append ChatData estimates."""',
+    b'#!/usr/bin/env python3\n"""Show ChatData estimates and update notices in Claude Code."""',
+)
 
 
 def _home():
@@ -173,7 +176,7 @@ def refresh_owned_statusline():
             return False
         old = destination.read_bytes()
         replacement = source.read_bytes()
-        if not old.startswith(WRAPPER_MARKER) or old == replacement:
+        if not any(old.startswith(marker) for marker in WRAPPER_MARKERS) or old == replacement:
             return False
         handle, temporary = tempfile.mkstemp(prefix=".chatdata-statusline-", dir=str(root))
         with os.fdopen(handle, "wb") as stream:

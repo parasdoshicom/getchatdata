@@ -3,10 +3,10 @@
 import argparse
 import getpass
 import hashlib
+import importlib.util
 import json
 import os
 import re
-import shutil
 import sys
 import tempfile
 import time
@@ -55,6 +55,7 @@ def paths():
         "lock": root / ".individual-telemetry.lock",
         "statusline": root / "claude-statusline.py",
         "statusline_backup": root / "claude-statusline-backup.json",
+        "statusline_preference": root / "claude-footer-preference.json",
     }
 
 
@@ -532,59 +533,22 @@ def _claude_settings_path():
     return config_root / "settings.json"
 
 
+def _footer_module():
+    path = Path(__file__).resolve().parent / "footer.py"
+    spec = importlib.util.spec_from_file_location("chatdata_footer", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("ChatData's Claude footer helper is unavailable.")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def install_statusline():
-    p = paths()
-    settings_path = _claude_settings_path()
-    settings = _read_json(settings_path, {})
-    if not isinstance(settings, dict):
-        raise RuntimeError("Claude settings must contain a JSON object.")
-    _ensure_root()
-    shutil.copyfile(Path(__file__).resolve().parent / "claude-statusline.py", p["statusline"])
-    try:
-        p["statusline"].chmod(0o700)
-    except OSError:
-        pass
-    command = '"' + sys.executable.replace('"', '\\"') + '" "' + str(p["statusline"]).replace('"', '\\"') + '"'
-    current = settings.get("statusLine")
-    prior = _read_json(p["statusline_backup"], None)
-    if isinstance(current, dict) and current.get("command") == command:
-        return {"statusline": "already_enabled", "path": str(settings_path)}
-    if prior is not None:
-        raise RuntimeError("A saved ChatData status-line configuration already exists. Disconnect before enabling it again.")
-    replacement = dict(current) if isinstance(current, dict) else {}
-    replacement.update({"type": "command", "command": command})
-    _write_json(p["statusline_backup"], {"had_status_line": "statusLine" in settings,
-                                               "value": current, "wrapper_command": command,
-                                               "installed_value": replacement})
-    settings["statusLine"] = replacement
-    settings_path.parent.mkdir(parents=True, exist_ok=True)
-    _write_json(settings_path, settings)
-    return {"statusline": "enabled", "path": str(settings_path),
-            "preserved_existing": current is not None}
+    return _footer_module().enable()
 
 
 def restore_statusline():
-    p = paths()
-    backup = _read_json(p["statusline_backup"], None)
-    if not isinstance(backup, dict):
-        return {"statusline": "not_managed"}
-    settings_path = _claude_settings_path()
-    settings = _read_json(settings_path, {})
-    if not isinstance(settings, dict):
-        raise RuntimeError("Claude settings must contain a JSON object.")
-    current = settings.get("statusLine")
-    if current != backup.get("installed_value"):
-        p["statusline_backup"].unlink(missing_ok=True)
-        p["statusline"].unlink(missing_ok=True)
-        return {"statusline": "changed_by_user", "restored": False}
-    if backup.get("had_status_line"):
-        settings["statusLine"] = backup.get("value")
-    else:
-        settings.pop("statusLine", None)
-    _write_json(settings_path, settings)
-    p["statusline_backup"].unlink(missing_ok=True)
-    p["statusline"].unlink(missing_ok=True)
-    return {"statusline": "restored", "restored": True}
+    return _footer_module().restore()
 
 
 def connect(client, enable_statusline=False):
@@ -624,7 +588,6 @@ def connect(client, enable_statusline=False):
 
 
 def disconnect(erase_local_usage=False):
-    statusline = restore_statusline()
     p = paths()
     for key in ("config", "queue", "state"):
         p[key].unlink(missing_ok=True)
@@ -632,7 +595,7 @@ def disconnect(erase_local_usage=False):
         p["summary"].unlink(missing_ok=True)
     return {"telemetry": "disconnected", "server_token_revoked": False,
             "dashboard_revoke_required": True, "local_summary_preserved": not erase_local_usage,
-            "claude_statusline": statusline}
+            "claude_statusline": {"statusline": "independent"}}
 
 
 def status():

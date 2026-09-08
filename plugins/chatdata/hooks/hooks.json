@@ -13,6 +13,12 @@
           {
             "type": "command",
             "command": "python3",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/footer.py", "session-start"],
+            "timeout": 2
+          },
+          {
+            "type": "command",
+            "command": "python3",
             "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.py", "flush", "--silent"],
             "timeout": 5,
             "async": true

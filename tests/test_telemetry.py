@@ -60,7 +60,11 @@ class TelemetryTests(unittest.TestCase):
         stop = hooks["Stop"][0]["hooks"][0]
         self.assertNotIn("async", stop)
         self.assertEqual(stop["args"][-1], "claude-hook")
-        startup_flush = hooks["SessionStart"][0]["hooks"][1]
+        footer = hooks["SessionStart"][0]["hooks"][1]
+        self.assertTrue(footer["args"][-2].endswith("/scripts/footer.py"))
+        self.assertEqual(footer["args"][-1], "session-start")
+        self.assertLessEqual(footer["timeout"], 2)
+        startup_flush = hooks["SessionStart"][0]["hooks"][2]
         self.assertEqual(startup_flush["args"][-2:], ["flush", "--silent"])
 
     def test_connect_requires_consent_and_hides_token(self):
@@ -257,7 +261,7 @@ class TelemetryTests(unittest.TestCase):
             T.claude_hook()
         self.assertEqual(T._queue_events(), [])
 
-    def test_statusline_preserves_existing_command_and_disconnect_restores_exact_value(self):
+    def test_statusline_replaces_existing_command_and_explicit_restore_is_exact(self):
         original = {"type": "command", "command": "printf 'WOZ saved'", "padding": 2}
         self.settings.parent.mkdir(parents=True)
         self.settings.write_text(json.dumps({"statusLine": original, "theme": "dark"}))
@@ -269,12 +273,12 @@ class TelemetryTests(unittest.TestCase):
         completed = subprocess.run([sys.executable, str(T.paths()["statusline"])], input="{}",
                                    text=True, capture_output=True, check=True,
                                    env={**os.environ, "CHATDATA_HOME": str(T.paths()["root"])})
-        self.assertIn("WOZ saved", completed.stdout)
+        self.assertNotIn("WOZ saved", completed.stdout)
         self.assertIn("1.2h estimated saved", completed.stdout)
         self.assertIn("$187.50 estimated value", completed.stdout)
-        result = T.disconnect()
+        result = T.restore_statusline()
         restored = json.loads(self.settings.read_text())
-        self.assertTrue(result["claude_statusline"]["restored"])
+        self.assertTrue(result["restored"])
         self.assertEqual(restored, {"statusLine": original, "theme": "dark"})
 
     def test_disconnect_preserves_summary_and_requires_dashboard_revoke(self):
@@ -286,7 +290,7 @@ class TelemetryTests(unittest.TestCase):
         self.assertTrue(T.paths()["summary"].exists())
         self.assertIsNone(T._config())
 
-    def test_disconnect_preserves_a_statusline_changed_after_install(self):
+    def test_disconnect_does_not_change_independent_statusline(self):
         self.settings.parent.mkdir(parents=True)
         self.settings.write_text(json.dumps({"statusLine": {"type": "command", "command": "old"}}))
         T.install_statusline()
@@ -294,8 +298,8 @@ class TelemetryTests(unittest.TestCase):
         self.settings.write_text(json.dumps({"statusLine": changed}))
         result = T.disconnect()
         self.assertEqual(json.loads(self.settings.read_text())["statusLine"], changed)
-        self.assertEqual(result["claude_statusline"]["statusline"], "changed_by_user")
-        self.assertFalse(T.paths()["statusline_backup"].exists())
+        self.assertEqual(result["claude_statusline"]["statusline"], "independent")
+        self.assertTrue(T.paths()["statusline_backup"].exists())
 
 
 if __name__ == "__main__":

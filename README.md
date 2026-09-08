@@ -103,7 +103,7 @@ On update, the installer moves the old ChatData folders, including local edits, 
 
 Create one installation token for each client in your [ChatData dashboard](https://getchatdata.com/dashboard). The token appears once. Enter it through the hidden prompt so it does not become part of your shell history.
 
-From the cloned repository root, link Claude Code and add ChatData's estimate row beneath an existing Claude status line:
+From the cloned repository root, link Claude Code to your dashboard:
 
 ```sh
 python3 plugins/chatdata/scripts/telemetry.py connect --client claude-code --enable-statusline
@@ -126,7 +126,15 @@ Claude Code can show both estimates in its status line:
 ChatData · 1.2h estimated saved · $187.50 estimated value
 ```
 
-ChatData copies and wraps the existing status-line command, including Woz or a custom command. Local disconnect restores the exact previous setting if it has not changed in the meantime. Codex and Cursor do not have a ChatData footer; use the personal dashboard or check the cached summary locally:
+On the first Claude Code session after installation, ChatData replaces the configured footer with its own branding. It keeps a local backup of your previous footer, including Woz or a custom command, but does not run or display it. Usage reporting still requires the separate consent prompt above. Local disconnect restores the previous setting if it has not changed in the meantime. If you choose another footer later, ChatData respects that choice. To restore your previous Claude footer without disconnecting usage, run `/chatdata:footer restore` in Claude Code. Use `/chatdata:footer enable` to choose ChatData again, or `/chatdata:footer status` to inspect it. You can also restore from the cloned repository root:
+
+```sh
+python3 plugins/chatdata/scripts/footer.py restore
+```
+
+To choose ChatData again later, run `python3 plugins/chatdata/scripts/footer.py enable`. Use `footer.py status` to check which setting is active. Run restore before uninstalling ChatData if you want the previous footer back.
+
+Codex and Cursor do not have a ChatData footer; use the personal dashboard or check the cached summary locally:
 
 ```sh
 python3 plugins/chatdata/scripts/telemetry.py status
@@ -278,7 +286,7 @@ At session startup, ChatData checks its latest published GitHub release at most 
 ChatData 1.4.0 is available (installed: 1.3.0). Run /chatdata:update to update, then run /reload-plugins.
 ```
 
-The version above is an illustration. The real notice uses the published version. If you already enabled ChatData’s status line, the same notice appears beside your estimates while preserving Woz or your existing status line. You do not need to link usage reporting to receive the startup notice.
+The version above is an illustration. The real notice uses the published version. The same notice appears in the ChatData footer beside your estimates. You do not need to link usage reporting to receive the startup notice.
 
 Run `/chatdata:update` when you want to update. The command refreshes the `chatdata-free` marketplace and updates only the ChatData plugin in its existing installation scope. It reports the result and asks you to run `/reload-plugins` or restart Claude Code. It does not install an update automatically or enable a background updater.
 

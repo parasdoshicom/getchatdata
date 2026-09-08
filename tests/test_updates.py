@@ -1,11 +1,9 @@
 import json
 import os
 from pathlib import Path
-import shlex
 import subprocess
 import sys
 import tempfile
-import time
 import unittest
 from unittest.mock import patch
 
@@ -141,7 +139,7 @@ class UpdateTests(unittest.TestCase):
     def _install_old_owned_wrapper(self):
         self.root.mkdir(parents=True)
         destination = self.root / "claude-statusline.py"
-        old = U.WRAPPER_MARKER + b"\n# prior ChatData wrapper\n"
+        old = U.WRAPPER_MARKERS[0] + b"\n# prior ChatData wrapper\n"
         destination.write_bytes(old)
         command = f'"{sys.executable}" "{destination}"'
         installed_value = {"type": "command", "command": command}
@@ -177,7 +175,7 @@ class UpdateTests(unittest.TestCase):
                 "CHATDATA_CLAUDE_SETTINGS": "", "CLAUDE_CONFIG_DIR": str(isolated)}):
             self.assertEqual(T._claude_settings_path(), isolated / "settings.json")
 
-    def test_statusline_appends_cached_notice_and_preserves_prior_output(self):
+    def test_statusline_appends_cached_notice(self):
         self.root.mkdir(parents=True)
         (self.root / "update-check.json").write_text(json.dumps({
             "schema_version": 1,
@@ -239,41 +237,26 @@ class UpdateTests(unittest.TestCase):
         self.assertNotIn("999", oversized_summary.stdout)
         self.assertIn("set your baseline", oversized_summary.stdout)
 
-    @unittest.skipUnless(os.name == "posix", "process-group regression is POSIX-specific")
-    def test_timed_out_prior_statusline_leaves_no_running_child(self):
+    def test_prior_statusline_is_never_executed_or_displayed(self):
         self.root.mkdir(parents=True)
-        helper = Path(self.tmp.name) / "spawn-child.sh"
-        child_pid_path = Path(self.tmp.name) / "child.pid"
-        helper.write_text('#!/bin/sh\nsleep 60 &\necho $! > "$1"\nwait\n')
-        helper.chmod(0o700)
-        prior_command = f"{shlex.quote(str(helper))} {shlex.quote(str(child_pid_path))}"
+        side_effect = Path(self.tmp.name) / "prior-ran"
+        prior_command = f'touch "{side_effect}"; printf WOZ_SENTINEL'
         (self.root / "claude-statusline-backup.json").write_text(json.dumps({
             "value": {"type": "command", "command": prior_command}
         }))
-        started = time.monotonic()
         completed = subprocess.run(
             [sys.executable, str(P / "scripts/claude-statusline.py")],
             input="{}", text=True, capture_output=True, check=True, timeout=5,
             env={**os.environ, "CHATDATA_HOME": str(self.root)},
         )
-        self.assertLess(time.monotonic() - started, 4)
         self.assertIn("ChatData", completed.stdout)
-        child_pid = int(child_pid_path.read_text().strip())
-        running = True
-        for _ in range(20):
-            status = subprocess.run(
-                ["ps", "-p", str(child_pid), "-o", "stat="],
-                text=True, capture_output=True, check=False).stdout.strip()
-            running = bool(status and not status.startswith("Z"))
-            if not running:
-                break
-            time.sleep(0.05)
-        self.assertFalse(running, "the preserved status-line command left a running child")
+        self.assertNotIn("WOZ_SENTINEL", completed.stdout)
+        self.assertFalse(side_effect.exists())
 
     def test_hook_and_manual_update_command_are_bounded(self):
         hooks = json.loads((P / "hooks/hooks.json").read_text())["hooks"]["SessionStart"][0]["hooks"]
-        self.assertEqual(hooks[1]["args"][-2:], ["flush", "--silent"])
-        update_hook = hooks[2]
+        self.assertEqual(hooks[2]["args"][-2:], ["flush", "--silent"])
+        update_hook = hooks[3]
         self.assertTrue(update_hook["args"][-2].endswith("/scripts/update-check.py"))
         self.assertEqual(update_hook["args"][-1], "hook")
         self.assertLessEqual(update_hook["timeout"], 2)

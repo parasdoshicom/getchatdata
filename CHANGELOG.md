@@ -1,5 +1,11 @@
 # Changes
 
+## 1.4.0 — September 7, 2026
+
+- Made ChatData the Claude Code footer on the first session after installation, with ChatData branding, savings estimates, and release notices.
+- Backed up the previous footer for restoration without running or displaying it. Later user footer choices are respected.
+- Kept footer setup separate from usage-reporting consent.
+
 ## 1.3.0 — September 7, 2026
 
 - Added a Claude Code startup notice for newer published releases, with `/chatdata:update` to update when requested. An existing ChatData status line also shows the cached notice.
