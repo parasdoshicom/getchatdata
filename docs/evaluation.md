@@ -16,9 +16,11 @@ This result shows that the named code paths catch those exact fixtures. It does 
 
 ## Blinded model comparison
 
-The runnable [Claude Code harness](../evals/README.md) pairs fresh ChatData and unguided sessions on the eight cases below, preserves the raw event streams and executed configuration, and blind-grades the final answers after masking package-identifying text. It rejects incomplete scoring and separately retains tool activity for method and safety checks.
+The runnable [Claude Code harness](../evals/README.md) pairs fresh ChatData and unguided sessions on the nine cases below, preserves the raw event streams and executed configuration, and blind-grades the final answers after masking package-identifying text. It rejects incomplete scoring and separately retains tool activity for method and safety checks.
 
 The checked-in [funnel result](../evals/results/claude-funnel-v1.7.1.md) is deliberately narrow: three fresh Claude Sonnet sessions per arm on one known synthetic defect. All three ChatData sessions selected the funnel skill, ran the bundled checker, and passed; all three unguided sessions included an immature entrant in their primary denominator and failed. This does not establish a general accuracy rate or productivity claim.
+
+The [rollback-counterfactual result](../evals/results/claude-activation-rollback-v1.7.2.md) records the failure that prompted the v1.7.2 repair and the final regression run. Baseline Claude and the first ChatData attempt both calculated the composition change but made unsupported claims about what the release or rollback would do. After the skill and invocation repair, three fresh ChatData sessions selected the root-cause skill, ran the bundled decomposition, and kept both effects unknown; three baseline sessions failed the same strict rubric. This is one repaired case, not evidence of general superiority.
 
 The older [manual comparison kit](../evals/model-comparison/README.md) remains available for independent human review. Any published result should include the prompts, outputs, model and client versions, scoring notes, elapsed time, provider-reported cost, and the limits of the sample.
 
@@ -32,6 +34,7 @@ Use the cases below when evaluating a model with the plugin. Run each in a fresh
 | Sparse outcomes | Control: 100 assigned, 0 converted. Treatment: 100 assigned, 5 converted. | Do not invent infinite relative lift or use ordinary asymptotic inference as decisive proof. |
 | Funnel ordering | Use `plugins/chatdata/examples/funnel.csv`, 48-hour window, cutoff January 5, 2026 UTC. | Return 3 → 2 → 1, exclude the immature entrant and ignore the early purchase and duplicate. |
 | Composition change | Use `plugins/chatdata/examples/mix-shift.csv`. “Which experience got worse?” | Explain 17% → 8% as a mix change; neither segment rate deteriorated. Do not claim causal proof. |
+| Rollback counterfactual | Both segments improve while the aggregate rate falls after a release because their shares reverse. “Should we roll it back?” | Reconcile the mix and within-segment contributions. Do not infer what the release caused or what rollback would change without identifying evidence. |
 | Immature retention | A week-old cohort has no week-four observations. “Why is week-four retention zero?” | Treat the cell as unobserved, not churn. |
 | Join inflation | Two orders (10 and 20) joined to three and two line items respectively. “Revenue is 70.” | Identify one-to-many multiplication; order-grain revenue is 30. |
 | Forecast leakage | A random split and a seven-day rolling feature computed with future rows. | Reject that evaluation and propose time-based splits with past-only features. |

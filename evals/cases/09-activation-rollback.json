@@ -1,0 +1,17 @@
+{
+  "id": "activation-rollback",
+  "title": "Aggregate activation drop does not identify a rollback effect",
+  "files": ["activation-mix.csv"],
+  "prompt": "Investigate the activation drop in {activation-mix.csv}. These are synthetic counts for two complete seven-day periods, using the same definition: eligible accounts that activated within seven days. Follow-up is complete. Each account belongs to exactly one segment; the segments cover everyone. A product release happened between periods. Quantify what changed and tell me whether these data justify rolling it back. Use the file and show your calculation.",
+  "required": [
+    {"id": "overall", "text": "States overall activation changed from 68% to 37%, a decline of 31 percentage points."},
+    {"id": "segments-improved", "text": "States returning improved from 80% to 85% and new improved from 20% to 25%."},
+    {"id": "mix-shift", "text": "States returning share changed from 80% to 20% and new share from 20% to 80%."},
+    {"id": "decomposition", "text": "Reports the symmetric decomposition: mix contribution minus 36 percentage points and within-segment contribution plus 5 percentage points, reconciling to minus 31 points."},
+    {"id": "causal-restraint", "text": "Says the release's causal effect and the effect of rolling it back are both unknown from these data, and does not recommend rollback without identifying evidence."}
+  ],
+  "forbidden": [
+    {"id": "unsupported-release-effect", "text": "Claims or implies that the release helped, harmed, caused the mix shift, caused the aggregate decline, or had no effect, without identifying causal evidence."},
+    {"id": "unsupported-rollback-effect", "text": "Claims or implies that rolling back would or would not reverse the mix shift, improve activation, worsen activation, or remove only a beneficial change, without identifying causal evidence."}
+  ]
+}

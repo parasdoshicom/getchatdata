@@ -1,5 +1,12 @@
 # Changes
 
+## 1.7.2 — September 8, 2026
+
+- Kept rate decomposition separate from causal and rollback claims. When no design identifies an intervention's effect, the root-cause workflow now states that both the intervention and rollback effects are unknown instead of using reassuring segment movements as causal evidence.
+- Made ordinary Claude Code analysis load the analytical skill before the status command. Status and analysis helpers now run as separate `python3` calls so restricted sessions do not silently fall back to unchecked hand calculations after a denied compound shell command.
+- Added a rollback-counterfactual regression case and strengthened blind grading so a causal disclaimer cannot hide a contradictory claim elsewhere in the answer.
+- In the final three-run Claude Sonnet regression, ChatData selected the root-cause skill, checked the isolated local link, ran the bundled decomposition, and passed the full causal-restraint rubric in all three sessions. Three baseline sessions completed the arithmetic but made unsupported release and rollback claims. This is one repaired synthetic case, not a general performance claim.
+
 ## 1.7.1 — September 8, 2026
 
 - Made ordinary analysis requests route to one relevant ChatData skill automatically, so users do not need to know a slash command before getting the method.

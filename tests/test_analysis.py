@@ -146,7 +146,8 @@ class PackagingTests(unittest.TestCase):
         context=json.loads(r.stdout)['hookSpecificOutput']['additionalContext']
         self.assertIn('ChatData '+json.loads((P/'scripts/package-info.json').read_text())['version'],context)
         self.assertIn('Dashboard linking is required for ChatData analysis',context)
-        self.assertIn('For every analysis request, invoke the one relevant ChatData skill',context)
+        self.assertIn('For every analysis request, invoke the one relevant analytical ChatData skill',context)
+        self.assertIn('Do not invoke chatdata:status as a substitute',context)
         self.assertNotIn('skills still work locally if reporting is disconnected',context)
 
     def test_funnel_skill_requires_checked_helper_and_mature_denominators(self):

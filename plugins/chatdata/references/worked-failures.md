@@ -60,10 +60,10 @@ These are synthetic teaching cases, not customer results or claims about ChatDat
 
 ## root-cause
 
-- **Tempting answer:** “Conversion fell from 18% to 12%, so the new checkout is worse.”
+- **Tempting answer:** “Conversion fell from 18% to 12% because traffic mix changed, so rolling back the new checkout would do nothing.”
 - **Planted defect:** In period one, channel A converts 16/80 and B converts 2/20. In period two, A converts 4/20 and B converts 8/80. Within-channel rates remain 20% and 10%; traffic shifted toward B.
 - **Required check or stop:** Reconcile totals and decompose the rate using exhaustive, disjoint channel groups. Check comparable periods and measurement before attributing the movement. Investigate why channel mix changed separately from checkout behavior.
-- **Corrected output:** Show 18/100 versus 12/100, a -6 percentage-point mix contribution, and zero within-channel contribution. The arithmetic explains where the decline came from; it does not establish what caused the mix shift or rule out other checkout effects.
+- **Corrected output:** Show 18/100 versus 12/100, a -6 percentage-point mix contribution, and zero within-channel contribution. The arithmetic explains where the decline came from. It neither supports nor rules out rollback. The checkout's causal effect and the result of a rollback remain unknown until an experiment, credible untreated comparison, or exposure analysis identifies them.
 
 ## sql-review
 
