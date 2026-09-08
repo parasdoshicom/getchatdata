@@ -10,7 +10,7 @@ grader is never told which arm produced an answer, sees no tool transcript,
 and receives a reviewer copy with package names and identifying helper paths
 masked. The original answer and tool calls remain unchanged for method review.
 
-The eight cases implement the model review cases documented in
+The nine cases implement the model review cases documented in
 [`docs/evaluation.md`](../docs/evaluation.md).
 
 ## Run it
@@ -25,7 +25,7 @@ Each stage is resumable: existing runs and grades are skipped unless you pass
 `--force`. Useful flags: `--cases <id ...>`, `--repeats N` (default 3),
 `--model`, `--invoke-skill`.
 
-Default run is 8 cases x 2 arms x 3 repeats = 48 sessions, plus 48 grading
+Default run is 9 cases x 2 arms x 3 repeats = 54 sessions, plus 54 grading
 calls. Expect roughly 30-60 minutes and a few dollars of model spend.
 
 ## Reading the output

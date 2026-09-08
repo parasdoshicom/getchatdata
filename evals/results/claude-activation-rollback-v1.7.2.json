@@ -1,0 +1,480 @@
+{
+  "schema_version": 1,
+  "run_date": "2026-09-08",
+  "case": "activation-rollback",
+  "fixture": "evals/fixtures/activation-mix.csv",
+  "fixture_sha256": "1fe8f508e0d8aac44ade69b30f004aad22aab26428270e6b61346204bc3046f3",
+  "prompt": "Investigate the activation drop in {activation-mix.csv}. These are synthetic counts for two complete seven-day periods, using the same definition: eligible accounts that activated within seven days. Follow-up is complete. Each account belongs to exactly one segment; the segments cover everyone. A product release happened between periods. Quantify what changed and tell me whether these data justify rolling it back. Use the file and show your calculation.",
+  "runs": [
+    {
+      "arm": "baseline",
+      "repeat": 0,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 40.0,
+      "provider_reported_cost_usd": 0.051273,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [
+        {
+          "tool_name": "Bash",
+          "tool_use_id": "toolu_01FeaiPiB75EbvUxmD95NxF4",
+          "tool_input": {
+            "command": "python3 -c \"\nseg=[('returning',800,640,200,170),('new',200,40,800,200)]\nNb=sum(r[1] for r in seg); Cb=sum(r[2] for r in seg)\nNa=sum(r[3] for r in seg); Ca=sum(r[4] for r in seg)\nprint('overall before %d/%d = %.4f'%(Cb,Nb,Cb/Nb))\nprint('overall after  %d/%d = %.4f'%(Ca,Na,Ca/Na))\nprint('overall change %.4f'%(Ca/Na-Cb/Nb))\nrate=0;mix=0\nfor name,nb,cb,na,ca in seg:\n  sb,sa=nb/Nb,na/Na; rb,ra=cb/nb,ca/na\n  print(name,'share %.2f->%.2f  rate %.3f->%.3f (d=%.3f)'%(sb,sa,rb,ra,ra-rb))\n  rate+=(sb+sa)/2*(ra-rb); mix+=(rb+ra)/2*(sa-sb)\nprint('rate effect %.4f'%rate)\nprint('mix effect  %.4f'%mix)\nprint('sum %.4f'%(rate+mix))\n# counterfactual: after rates, before mix\ncf=sum((nb/Nb)*(ca/na) for _,nb,cb,na,ca in seg)\nprint('after rates @ before mix = %.4f'%cf)\n\"\n",
+            "description": "Kitagawa decomposition of activation rate change"
+          }
+        }
+      ],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 -c \\\"\\nseg=[('returning',800,640,200,170),('new',200,40,800,200)]\\nNb=sum(r[1] for r in seg); Cb=sum(r[2] for r in seg)\\nNa=sum(r[3] for r in seg); Ca=sum(r[4] for r in seg)\\nprint('overall before %d/%d = %.4f'%(Cb,Nb,Cb/Nb))\\nprint('overall after  %d/%d = %.4f'%(Ca,Na,Ca/Na))\\nprint('overall change %.4f'%(Ca/Na-Cb/Nb))\\nrate=0;mix=0\\nfor name,nb,cb,na,ca in seg:\\n  sb,sa=nb/Nb,na/Na; rb,ra=cb/nb,ca/na\\n  print(name,'share %.2f->%.2f  rate %.3f->%.3f (d=%.3f)'%(sb,sa,rb,ra,ra-rb))\\n  rate+=(sb+sa)/2*(ra-rb); mix+=(rb+ra)/2*(sa-sb)\\nprint('rate effect %.4f'%rate)\\nprint('mix effect  %.4f'%mix)\\nprint('sum %.4f'%(rate+mix))\\n# counterfactual: after rates, before mix\\ncf=sum((nb/Nb)*(ca/na) for _,nb,cb,na,ca in seg)\\nprint('after rates @ before mix = %.4f'%cf)\\n\\\"\\n\", \"description\": \"Kitagawa decomposition of activation rate change\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": false,
+        "local_link_checked": false,
+        "decomposition_helper_run": false
+      },
+      "answer": "## The data\n\n| Segment | Before: converted / eligible | Rate | After: converted / eligible | Rate | Rate change |\n|---|---|---|---|---|---|\n| returning | 640 / 800 | 80.0% | 170 / 200 | 85.0% | **+5.0 pp** |\n| new | 40 / 200 | 20.0% | 200 / 800 | 25.0% | **+5.0 pp** |\n| **Total** | **680 / 1000** | **68.0%** | **370 / 1000** | **37.0%** | **\u221231.0 pp** |\n\n## What changed\n\nThe headline activation rate fell 31 points (68% \u2192 37%). But **every segment's activation rate went up by 5 points.** This is Simpson's paradox: the drop is entirely a composition shift, not a performance drop.\n\n- \"returning\" accounts (which activate ~80%) went from 80% of the eligible pool to 20%.\n- \"new\" accounts (which activate ~20-25%) went from 20% of the pool to 80%.\n\n## Calculation (Kitagawa decomposition of the \u221231 pp)\n\nUsing average shares and average rates across the two periods:\n\n**Rate effect** (did segments get better/worse at converting?)\n= 0.5\u00b7(0.85\u22120.80) + 0.5\u00b7(0.25\u22120.20)\n= 0.025 + 0.025 = **+5.0 pp**\n\n**Mix effect** (did the population shift toward low-converters?)\n= 0.825\u00b7(0.20\u22120.80) + 0.225\u00b7(0.80\u22120.20)\n= (\u22120.495) + (0.135) = **\u221236.0 pp**\n\nTotal = +5.0 \u2212 36.0 = **\u221231.0 pp** \u2713\n\nCounterfactual check: apply the *after* rates to the *before* mix \u2192 0.8\u00b70.85 + 0.2\u00b70.25 = **73%**, i.e. +5 pp vs the old 68%. The release, holding mix constant, *raised* activation.\n\n## Does this justify a rollback?\n\n**No.** Nothing in these data shows the release hurt activation. Within-segment conversion is flat-to-up (+5 pp in both segments; with n=200 in the smaller cells these differences are roughly 1.5\u20131.7 standard errors, so \"not worse\" is solid, \"meaningfully better\" is not yet proven). Rolling back would sacrifice a likely small gain and would do nothing about the actual cause of the reported drop.\n\nThe thing to investigate is **why the eligible pool flipped from 80% returning to 80% new** between the two weeks \u2014 a marketing push, a pricing/eligibility change, seasonality, or a definitional artifact in who counts as \"eligible.\" That mix shift is the whole story, and it's a top-of-funnel question, not a product-release question.\n\nCaveats: synthetic data, only one week per period (no way to separate the release from week-to-week noise or the concurrent mix change), and no per-segment confidence intervals tight enough to declare improvement.",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": false
+        },
+        "forbidden": {
+          "unsupported-release-effect": true,
+          "unsupported-rollback-effect": true
+        },
+        "reason": "Decomposition and descriptive points all correct. But answer states 'the release, holding mix constant, raised activation' and that rollback 'would sacrifice a likely small gain' and 'do nothing about the cause'\u2014unsupported causal/counterfactual claims, breaking causal restraint.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "e4d3cc53763d9d341a12e206c28d3bc65d1727fb95fa57446c4c9357a302ddde"
+    },
+    {
+      "arm": "baseline",
+      "repeat": 1,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 33.8,
+      "provider_reported_cost_usd": 0.03977850000000001,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": false,
+        "local_link_checked": false,
+        "decomposition_helper_run": false
+      },
+      "answer": "## What the file says\n\n| segment | n_before | conv_before | rate_before | n_after | conv_after | rate_after |\n|---|---|---|---|---|---|---|\n| returning | 800 | 640 | **80.0%** | 200 | 170 | **85.0%** |\n| new | 200 | 40 | **20.0%** | 800 | 200 | **25.0%** |\n| **total** | 1000 | 680 | **68.0%** | 1000 | 370 | **37.0%** |\n\nHeadline: overall activation fell **68.0% \u2192 37.0%, \u221231.0 pp** (a 46% relative drop).\n\n## Decomposition (this is Simpson's paradox)\n\nEvery segment improved, by exactly +5 pp:\n- returning: 80.0% \u2192 85.0% (+5.0 pp)\n- new: 20.0% \u2192 25.0% (+5.0 pp)\n\nThe eligible population's composition flipped:\n- returning share: 800/1000 = 80% \u2192 200/1000 = 20%\n- new share: 20% \u2192 80%\n\nNew accounts activate ~4\u00d7 worse than returning ones in *both* periods, so shifting the mix toward them drags the overall number down even while each group gets better.\n\n### Standardization \u2014 split the \u221231 pp into mix vs. rate\n\nHold the mix fixed, vary only the rates:\n\n- **Before-period mix, after-period rates:** 0.80\u00b70.85 + 0.20\u00b70.25 = 0.68 + 0.05 = **73.0%**\n  - rate effect = 73.0 \u2212 68.0 = **+5.0 pp**\n  - mix effect = 37.0 \u2212 73.0 = **\u221236.0 pp**\n- **After-period mix, before-period rates:** 0.20\u00b70.80 + 0.80\u00b70.20 = 0.16 + 0.16 = **32.0%**\n  - mix effect = 32.0 \u2212 68.0 = **\u221236.0 pp**\n  - rate effect = 37.0 \u2212 32.0 = **+5.0 pp**\n\nBoth directions agree: **mix \u221236 pp, rate +5 pp, net \u221231 pp.** The entire decline (and then some) is composition; the release is associated with a uniform +5 pp gain.\n\n## Is the +5 pp real?\n\nTwo\u2011proportion z-tests on each segment:\n- returning: \u03940.05, SE \u2248 \u221a(.85\u00b7.15/200 + .80\u00b7.20/800) \u2248 0.0289, z \u2248 1.73, p \u2248 0.08\n- new: \u03940.05, SE \u2248 \u221a(.25\u00b7.75/800 + .20\u00b7.80/200) \u2248 0.0322, z \u2248 1.55, p \u2248 0.12\n\nNeither is individually significant at 0.05, but both point the same way and there is **no segment showing a decline**. So the evidence for improvement is suggestive, not conclusive; the evidence *against* the release is nonexistent.\n\n## Recommendation: do not roll back\n\n- Within every segment \u2014 same eligibility definition, complete 7\u2011day follow\u2011up \u2014 activation went **up** after the release.\n- The \u221231 pp headline is driven by a 4\u00d7 swing in who is eligible (from 80% returning to 80% new), not by the product.\n- Rolling back would forfeit a likely +5 pp within-segment gain and would not touch the actual cause of the lower aggregate number.\n\nWhat to do instead: report activation **by segment** (or mix-adjusted), and investigate *why* the eligible pool shifted so hard toward new accounts (marketing campaign, onboarding change, seasonality) \u2014 that's the real change, and whether it's good or bad depends on volume economics, not the activation rate alone. Note these are synthetic counts with a single period per arm, so treat the +5 pp as directional.",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": false
+        },
+        "forbidden": {
+          "unsupported-release-effect": true,
+          "unsupported-rollback-effect": true
+        },
+        "reason": "Decomposition and descriptive points all present. But answer attributes the +5pp gain to the release, says decline is 'not by the product', and claims rollback would 'forfeit' the gain and not fix the cause\u2014unsupported causal/counterfactual claims.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "577dc83f3eab9d0ac6298589feb60ebbc747277b2c49d84bb2d5b3a308ccbf98"
+    },
+    {
+      "arm": "baseline",
+      "repeat": 2,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 31.8,
+      "provider_reported_cost_usd": 0.0394904,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": null
+      },
+      "plugin_available": false,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": false,
+        "local_link_checked": false,
+        "decomposition_helper_run": false
+      },
+      "answer": "## What the file says\n\n| segment | n_before | conv_before | rate_before | n_after | conv_after | rate_after |\n|---|---|---|---|---|---|---|\n| returning | 800 | 640 | **80.0%** | 200 | 170 | **85.0%** |\n| new | 200 | 40 | **20.0%** | 800 | 200 | **25.0%** |\n| **total** | 1000 | 680 | **68.0%** | 1000 | 370 | **37.0%** |\n\nHeadline: activation fell **68.0% \u2192 37.0%, a 31.0 pp drop** (\u201145% relative).\n\n## What actually changed\n\n**Every segment improved by exactly 5 pp:**\n- returning: 80% \u2192 85%\n- new: 20% \u2192 25%\n\nThe only thing that got worse is the **mix**. The eligible pool flipped:\n- returning: 80% \u2192 20% of eligibles\n- new: 20% \u2192 80% of eligibles\n\nThis is Simpson's paradox: the overall rate dropped even though both parts rose, because weight moved onto the low-activating segment.\n\n## Decomposition of the 31 pp drop (Kitagawa / Oaxaca)\n\nSplit the total change into a **rate effect** (segments converting better/worse) and a **mix effect** (composition shift), each evaluated at the average of the two periods.\n\nRate effect = \u03a3 (avg share) \u00d7 (rate_after \u2212 rate_before)\n= 0.5 \u00d7 (0.85 \u2212 0.80) + 0.5 \u00d7 (0.25 \u2212 0.20)\n= 0.5 \u00d7 0.05 + 0.5 \u00d7 0.05 = **+0.050**\n\nMix effect = \u03a3 (avg rate) \u00d7 (share_after \u2212 share_before)\n= 0.825 \u00d7 (0.20 \u2212 0.80) + 0.225 \u00d7 (0.80 \u2212 0.20)\n= 0.825 \u00d7 (\u22120.60) + 0.225 \u00d7 (0.60)\n= \u22120.495 + 0.135 = **\u22120.360**\n\nTotal = +0.050 \u2212 0.360 = **\u22120.310** \u2713 (matches 68% \u2192 37%)\n\n**Cross-check by standardization (hold mix fixed):**\n- At the *before* mix (80/20): after-period rates give 0.8\u00d70.85 + 0.2\u00d70.25 = **73.0%** vs 68.0% before \u2192 **+5 pp**.\n- At the *after* mix (20/80): before-period rates give 0.2\u00d70.80 + 0.8\u00d70.20 = **32.0%** vs 37.0% after \u2192 **+5 pp**.\n\nMix-adjusted activation went **up 5 pp** no matter which period's population you standardize to.\n\n## Does this justify a rollback?\n\n**No \u2014 not on these numbers.** The release is associated with a 5 pp gain in activation within *every* segment. The entire headline decline (\u201136 pp of mix effect, partly offset by the +5 pp rate gain) comes from a change in *who* was eligible, not from worse product performance. Rolling back would remove a broad improvement and would not touch the actual cause of the lower aggregate number.\n\nWhat the data can't tell you, and what you should chase before closing this out:\n- **Why did the eligible mix shift so hard** (80/20 \u2192 20/80)? A 4\u00d7 swing in one release cycle is huge \u2014 new acquisition campaign, seasonality, an eligibility-definition or funnel change, or the release itself pulling in a flood of new signups. That is the real story.\n- Only two periods of synthetic data, no confidence intervals, no pre-trend \u2014 the 5 pp within-segment lift isn't established as causal either. But the asymmetry is clear: nothing here points to the release hurting activation.",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": false
+        },
+        "forbidden": {
+          "unsupported-release-effect": true,
+          "unsupported-rollback-effect": true
+        },
+        "reason": "Decomposition and descriptive points all correct. But answer asserts rolling back 'would remove a broad improvement and would not touch the actual cause' and frames the release as a within-segment gain, making unsupported causal/counterfactual claims and failing full causal restraint.",
+        "verdict": "fail",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "84f471f92905ece4913abc5b888e63addf3f021ef42ff64f2b683d2188cfe579"
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 0,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 50.7,
+      "provider_reported_cost_usd": 0.0855394,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.2"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:root-cause\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/working-agreement.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/tools.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/status.py\\\" --json\", \"description\": \"Check ChatData local link status\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/analyze.py\\\" decompose \\\"<synthetic-workdir>/activation-mix.csv\\\"\", \"description\": \"Run rate decomposition on activation mix\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": true,
+        "local_link_checked": true,
+        "decomposition_helper_run": true
+      },
+      "answer": "## What the file says\n\nTwo full 7-day periods, 1,000 eligible accounts each, same \"activated within 7 days\" definition.\n\n| Segment | Before: eligible | Before: activated | Rate | After: eligible | After: activated | Rate |\n|---|---|---|---|---|---|---|\n| returning | 800 | 640 | 80.0% | 200 | 170 | 85.0% |\n| new | 200 | 40 | 20.0% | 800 | 200 | 25.0% |\n| **Total** | **1,000** | **680** | **68.0%** | **1,000** | **370** | **37.0%** |\n\nOverall activation: **68.0% \u2192 37.0% = \u221231.0 pp** (680 \u2192 370 activations; denominator unchanged at 1,000).\n\n## Arithmetic bridge (symmetric/Shapley decomposition, `analyze.py decompose`)\n\n```\nchange_pp = -31.0\n  mix_pp    = -36.0   (shift in segment shares)\n  within_pp =  +5.0   (activation rate within segments)\n  residual  \u2248  0\n```\n\nSegment detail:\n\n| Segment | Share shift | Mix contribution | Within-segment rate | Within contribution |\n|---|---|---|---|---|\n| returning | 80% \u2192 20% | **\u221249.5 pp** | 80.0% \u2192 85.0% | +2.5 pp |\n| new | 20% \u2192 80% | +13.5 pp | 20.0% \u2192 25.0% | +2.5 pp |\n\n**All of the decline is composition.** The eligible base flipped from 80% \"returning\" (high activators) to 80% \"new\" (low activators). Within each segment, measured activation went *up*, not down (+5 pp combined). Report that as an association only \u2014 it is not evidence about the release.\n\n## Ruled out / to check first\n\n- **Partial periods / late data:** stated complete; denominators are exactly 1,000 both periods.\n- **Definition drift:** you state the definition is identical. The one thing this decomposition cannot see is whether *segment assignment* or *eligibility* itself was redefined at release. A product release does not normally change who becomes eligible; a 4\u00d7 swing in the returning/new split is the dominant fact and needs its own explanation (acquisition/marketing change, eligibility rule change, or segment-logic change concurrent with the release).\n\n## Hypotheses for the composition shift (need exposure evidence, not this file)\n\n| Mechanism | Predicted check |\n|---|---|\n| Acquisition surge of new accounts (campaign, launch PR) unrelated to release quality | New-account inflow by source/date; is the returning pool absolutely smaller or just diluted? (it is absolutely smaller: 800 \u2192 200) |\n| Release changed eligibility/segment definitions | Diff the eligibility and segment SQL across periods |\n| Release genuinely changed activation behavior | Requires a holdback or staged-rollout comparison; not present here |\n\n## Does this justify rolling back?\n\n**This arithmetic alone neither supports nor rules out a rollback.** A decomposition attributes the movement; it does not identify what the release caused or what reversing it would do. There is no control group, holdback, or other design here that isolates the release effect. Both the release's effect and any rollback's effect are unknown from this file.\n\nTo decide on a rollback you need: (1) confirmation that eligibility and segment definitions are unchanged, (2) the source/reason for the new-account surge, and (3) a randomized holdback or staged-rollout contrast measuring within-segment activation for exposed vs. unexposed accounts.\n\nWant me to save this as an analysis record under `analysis/activation-drop/`?",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": true
+        },
+        "forbidden": {
+          "unsupported-release-effect": false,
+          "unsupported-rollback-effect": false
+        },
+        "reason": "All required points hit: 68\u219237 (-31pp), within-segment gains, share flip, symmetric decomposition (-36/+5), and explicit causal/rollback restraint. No unsupported causal or counterfactual claims; hypotheses framed as needing exposure evidence.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "5fd055cb6b1a6740a18a78103b1a7dfa0a53a1c29395696c8d359b4037a8c36e"
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 1,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 48.2,
+      "provider_reported_cost_usd": 0.0823973,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.2"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:root-cause\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/working-agreement.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/tools.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/status.py\\\" --json\", \"description\": \"Check ChatData link status\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/analyze.py\\\" decompose \\\"<synthetic-workdir>/activation-mix.csv\\\"\", \"description\": \"Run rate decomposition on activation data\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": true,
+        "local_link_checked": true,
+        "decomposition_helper_run": true
+      },
+      "answer": "## Activation drop: what the file shows\n\n**Source:** `activation-mix.csv` (sha256 `1fe8f508\u20263046f3`), two complete 7\u2011day periods, same definition (eligible accounts activating within 7 days), follow\u2011up complete, segments exhaustive and disjoint.\n\n### The bridge\n\n| | Eligible | Activated | Rate |\n|---|---|---|---|\n| Before | 1,000 | 680 | **68.0%** |\n| After | 1,000 | 370 | **37.0%** |\n| Change | 0 | \u2212310 | **\u221231.0 pp** |\n\nTotal eligible volume is unchanged; activations fell 680 \u2192 370.\n\n### Decomposition (symmetric / Shapley, from `analyze.py decompose`)\n\n| Segment | Weight before \u2192 after | Rate before \u2192 after | Mix pp | Within pp | Total pp |\n|---|---|---|---|---|---|\n| returning | 80% \u2192 20% | 80% \u2192 85% | \u221249.5 | +2.5 | \u221247.0 |\n| new | 20% \u2192 80% | 20% \u2192 25% | +13.5 | +2.5 | +16.0 |\n| **Total** | | | **\u221236.0** | **+5.0** | **\u221231.0** |\n\nReconciliation residual \u2248 0.\n\nHand check, returning segment: \u0394weight = \u22120.60, avg rate = (0.80+0.85)/2 = 0.825 \u2192 mix = \u22120.60 \u00d7 0.825 = \u221249.5 pp. \u0394rate = +0.05, avg weight = (0.80+0.20)/2 = 0.50 \u2192 within = +0.05 \u00d7 0.50 = +2.5 pp. Same arithmetic for `new` gives +13.5 / +2.5. Mix sums to \u221236.0 pp, within to +5.0 pp, net \u221231.0 pp.\n\n### Where the change is\n\n- **Essentially all of the \u221231 pp is composition (mix): \u221236 pp.** The eligible pool swung from 80% returning / 20% new to 20% returning / 80% new. Because new accounts activate far lower (~20\u201325%) than returning (~80\u201385%), the same blended definition produces a much lower overall rate.\n- **Within\u2011segment activation did not drop anywhere.** Both segments are slightly higher after (returning +5 pp, new +5 pp), contributing +5 pp combined. Report this as an association only.\n\n### Does this justify rolling back the release?\n\n**This arithmetic alone neither supports nor rules out a rollback.** A decomposition attributes the movement; it does not identify what the release caused or what reversing it would do. Key points:\n\n- The dominant driver is *who became eligible*, not activation performance. Nothing here explains *why* the eligible mix shifted 4x toward new accounts, or whether the release caused that shift (e.g., by changing eligibility, onboarding, or acquisition) or whether it was a concurrent, unrelated change (marketing push, seasonality, pipeline).\n- The release effect and the rollback effect are both unknown. The within\u2011segment rates being flat-to-up is not evidence that the release helped, and must not be used to argue against rollback.\n\n**To decide on rollback you need identifying evidence, not this bridge:** a randomized/holdout comparison of the release, or a quasi\u2011experimental design (e.g., staged rollout, difference\u2011in\u2011differences on an unexposed cohort); plus confirmation of whether the eligibility definition or acquisition sources changed between periods. Until then, the actionable finding is: investigate the eligible\u2011pool composition shift toward new accounts \u2014 that is the mechanism behind the headline number.\n\nI can save this as a reusable analysis record under `analysis/activation-drop/` if you want.",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": true
+        },
+        "forbidden": {
+          "unsupported-release-effect": false,
+          "unsupported-rollback-effect": false
+        },
+        "reason": "All required points hit with correct arithmetic; causal and rollback effects explicitly held as unknown, no rollback recommendation, within-segment gains flagged as association only.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "a0f1dff742f8425903f82a6089ab15e187058b0494a85473d9ae95678faec0b1"
+    },
+    {
+      "arm": "chatdata",
+      "repeat": 2,
+      "resolved_model": "claude-sonnet-5",
+      "claude_code_version": "2.1.265",
+      "elapsed_seconds": 47.6,
+      "provider_reported_cost_usd": 0.0828734,
+      "executed_configuration": {
+        "model": "sonnet",
+        "invoke_skill": false,
+        "builtin_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash",
+          "Skill"
+        ],
+        "allowed_tools": [
+          "Read",
+          "Glob",
+          "Grep",
+          "Bash(python3 *)",
+          "Skill"
+        ],
+        "restricted": true,
+        "strict_mcp_config": true,
+        "permission_mode": "dontAsk",
+        "session_persistence": false,
+        "isolated_usage_state": true,
+        "plugin_version": "1.7.2"
+      },
+      "plugin_available": true,
+      "permission_denials": [],
+      "hook_errors": [],
+      "tool_calls": [
+        {
+          "name": "Skill",
+          "input": "{\"skill\": \"chatdata:root-cause\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/working-agreement.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<public-repository>/plugins/chatdata/references/tools.md\"}"
+        },
+        {
+          "name": "Read",
+          "input": "{\"file_path\": \"<synthetic-workdir>/activation-mix.csv\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/status.py\\\" --json\", \"description\": \"Check ChatData link status\"}"
+        },
+        {
+          "name": "Bash",
+          "input": "{\"command\": \"python3 \\\"<public-repository>/plugins/chatdata/scripts/analyze.py\\\" decompose \\\"<synthetic-workdir>/activation-mix.csv\\\"\", \"description\": \"Decompose activation rate change\"}"
+        }
+      ],
+      "trace_checks": {
+        "analytical_skill_invoked": true,
+        "local_link_checked": true,
+        "decomposition_helper_run": true
+      },
+      "answer": "## Activation drop: what changed\n\n### Reconciliation (from the file)\n\n| | Eligible (n) | Activated | Rate |\n|---|---|---|---|\n| **Period 1** returning | 800 | 640 | 80.0% |\n| **Period 1** new | 200 | 40 | 20.0% |\n| **Period 1 total** | 1,000 | 680 | **68.0%** |\n| **Period 2** returning | 200 | 170 | 85.0% |\n| **Period 2** new | 800 | 200 | 25.0% |\n| **Period 2 total** | 1,000 | 370 | **37.0%** |\n\nOverall change: **\u221231.0 pp** (68.0% \u2192 37.0%). Total eligible volume is identical (1,000 vs 1,000).\n\n### Arithmetic bridge (Shapley decomposition, `analyze.py decompose`)\n\n| Component | Contribution |\n|---|---|\n| Mix shift (segment weights) | **\u221236.0 pp** |\n| Within-segment rate change | **+5.0 pp** |\n| Residual | ~0 |\n| **Total** | **\u221231.0 pp** |\n\nPer segment: returning mix \u221249.5 pp / within +2.5 pp; new mix +13.5 pp / within +2.5 pp.\n\n### Reading\n\nThis is a composition shift (Simpson's paradox). The `new` segment \u2014 which activates at roughly a quarter the rate of `returning` \u2014 went from 20% of the eligible pool to 80%. That reweighting alone drags the blended rate from 68% to 32%.\n\nMeanwhile **both segments' activation rates went up**, not down: returning 80%\u219285%, new 20%\u219225%. Holding the Period 1 mix constant, Period 2 would have posted 0.8\u00b785% + 0.2\u00b725% = **73%** (up 5 pp).\n\nPre-diagnosis checks: same definition/window stated, follow-up complete, both full seven-day periods, equal denominators, exhaustive disjoint segments covering everyone. The obvious caveat is that the partition is coarse (two segments) and the counts are synthetic \u2014 I can't inspect timezone, event renames, or the source pipeline, and \"new\" being 80% of eligible accounts in Period 2 is itself unusual and worth validating against the raw inflow.\n\n### Ranked hypotheses for the mix shift (associations only)\n\n| Mechanism | Predicted observation | Next test |\n|---|---|---|\n| Inflow composition changed independently (campaign, seasonality, eligibility-feed change) sent a wave of `new` accounts | `new` eligible count up ~4\u00d7 regardless of release exposure; timing not aligned to release | Plot daily eligible counts by segment vs release date; check marketing/eligibility-rule changelogs |\n| Release changed who becomes *eligible* (e.g. loosened criteria, new signup surface) | Eligibility rule/definition diff at release; new-eligible accounts concentrated in release-exposed paths | Diff eligibility logic; compare eligible inflow for exposed vs unexposed cohorts |\n| Release changed activation behavior within segments | Within-segment rate change correlates with exposure | Compare activation rate for exposed vs not-yet-exposed accounts in the same segment |\n\nNone of these is testable with this file. A decomposition attributes arithmetic, not cause.\n\n### Does this justify rolling back the release?\n\n**This arithmetic alone neither supports nor rules out a rollback.** The decomposition shows *where* the movement is (a shift toward the low-activating `new` segment), not what the release did. The data contain no design that identifies the release's effect: there's no exposed-vs-unexposed comparison, no pre-trend, no holdout. The release, the composition shift, and the within-segment rate increases are simply concurrent. I can't say the release caused the drop, caused the influx of `new` accounts, helped, or did nothing \u2014 and I can't say whether rolling it back would raise, lower, or not move the blended rate.\n\nTo decide, you need exposure-linked evidence: activation rate for release-exposed vs unexposed accounts within each segment over the same window, plus the daily eligible-inflow-by-segment series aligned to the release date and any concurrent marketing/eligibility changes.",
+      "grade": {
+        "required": {
+          "overall": true,
+          "segments-improved": true,
+          "mix-shift": true,
+          "decomposition": true,
+          "causal-restraint": true
+        },
+        "forbidden": {
+          "unsupported-release-effect": false,
+          "unsupported-rollback-effect": false
+        },
+        "reason": "All required points hit with correct numbers and decomposition; causal and rollback effects explicitly stated as unknown, hypotheses framed as associations only.",
+        "verdict": "pass",
+        "unsafe_tool_attempts": 0,
+        "review_copy_masked": false
+      },
+      "run_sha256": "bbc98a9087f75645934fe8f1b46095dcf5172686c4b5437443aaf2f1e770c5b5"
+    }
+  ],
+  "limits": [
+    "One synthetic case, one prompt, one model, and three runs per arm.",
+    "This is a regression check for skill discovery, helper adoption, and causal restraint; it is not a general accuracy or productivity claim.",
+    "The case became a documented regression fixture after the first run exposed the defect, so it does not test generalization to an unseen failure.",
+    "The blind grader is an LLM; the final answers and tool traces were also inspected manually.",
+    "One baseline run had one denied Python tool call. All three ChatData runs had no permission denials or recorded hook errors."
+  ]
+}

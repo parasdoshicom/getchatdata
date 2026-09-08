@@ -215,6 +215,10 @@ GRADER = """You are grading one analyst's written answer against a fixed rubric.
 You do not know which tool, if any, produced this answer. Do not speculate about it.
 Judge only what the answer actually says. An answer that reaches a required point
 implicitly still counts; an answer that merely lists a topic without applying it does not.
+Read the whole answer for contradictions. A causal disclaimer does not cancel an
+unsupported causal or counterfactual claim elsewhere. If the rubric forbids such
+claims, mark the forbidden item true whether the answer says an intervention helped,
+harmed, had no effect, or predicts what a rollback would or would not change.
 
 ## The task the analyst was given
 {prompt}

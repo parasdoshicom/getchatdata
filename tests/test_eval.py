@@ -22,7 +22,7 @@ class CaseDefinitionTests(unittest.TestCase):
         self.cases = E.load_cases()
 
     def test_every_documented_case_is_present(self):
-        self.assertEqual(len(self.cases), 8)
+        self.assertEqual(len(self.cases), 9)
 
     def test_ids_are_unique(self):
         ids = [c['id'] for c in self.cases]
