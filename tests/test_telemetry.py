@@ -301,7 +301,9 @@ class TelemetryTests(unittest.TestCase):
         agreement = (P / "references/working-agreement.md").read_text()
         self.assertIn('python3 "<resolved telemetry.py path>" flush', agreement)
         self.assertIn('python3 "<resolved status.py path>" --json', agreement)
-        self.assertIn("clients.<current-client>.local_link", agreement)
+        self.assertIn('clients["claude-code"]["local_link"]', agreement)
+        self.assertIn('clients["codex"]["local_link"]', agreement)
+        self.assertIn('clients["cursor"]["local_link"]', agreement)
         self.assertIn("Do not request broader client permissions", agreement)
         self.assertIn("or retry automatically", agreement)
 
