@@ -18,3 +18,5 @@ Evaluate interval coverage and width by horizon. Use a method consistent with re
 Deliver baseline versus model backtests, a forecast with dated horizon and uncertainty, known failure modes, and a refresh trigger. Save split dates, data version, code, and environment. Never call in-sample fit a forecast validation.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#forecasting) when checking a plausible but unsupported answer.

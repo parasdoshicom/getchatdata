@@ -1,5 +1,13 @@
 # Changes
 
+## 1.7.0 — September 8, 2026
+
+- Added a deterministic retention check that fixes cohort membership and denominators, deduplicates returns, uses explicit calendar boundaries, and leaves immature periods unobserved.
+- Added a deterministic join audit that validates declared key relationships, measures fanout, estimates output rows, and blocks repeated left-side measures.
+- Added an optional read-only DuckDB adapter for one bounded local `SELECT` or `WITH` query. The core plugin still needs only Python's standard library.
+- Added one concrete failure case for every skill so agents can see the exact evidence that should stop a plausible wrong answer.
+- Added a five-case planted-defect enforcement result and a runnable blinded harness for future ChatData-versus-unguided model comparisons. No head-to-head performance claim is made yet.
+
 ## 1.6.5 — September 8, 2026
 
 - Round customer-facing dollar estimates to whole dollars in the Claude footer and status report. The underlying dashboard arithmetic stays unchanged.

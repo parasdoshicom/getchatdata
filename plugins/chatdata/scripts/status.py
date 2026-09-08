@@ -408,7 +408,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Print machine-readable diagnostics.")
     parser.add_argument("--check", action="store_true",
-                        help="Also run the three bundled synthetic calculation checks.")
+                        help="Also run the five bundled synthetic calculation checks.")
     args = parser.parse_args()
     report = build_report(check=args.check)
     if args.json:

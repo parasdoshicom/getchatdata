@@ -215,7 +215,7 @@ class StatusReportTests(unittest.TestCase):
         self.assertTrue(report["offline_check"])
         self.assertFalse(report["server_authorization_checked"])
         self.assertEqual(report["local_checks"]["status"], "passed")
-        self.assertEqual(len(report["local_checks"]["checks"]), 3)
+        self.assertEqual(len(report["local_checks"]["checks"]), 5)
 
     def test_status_command_uses_report_with_bundled_checks(self):
         command = (PLUGIN / "commands/status.md").read_text(encoding="utf-8")

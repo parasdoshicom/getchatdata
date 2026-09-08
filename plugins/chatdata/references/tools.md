@@ -44,6 +44,42 @@ python3 plugins/chatdata/scripts/analyze.py profile plugins/chatdata/examples/fu
 
 Checks missing values, duplicate rows and duplicate keys without printing raw cell values. These small-file helpers load CSV rows into memory. For large sources, adapt the method to a bounded warehouse query or chunked processing. Profiling alone cannot establish freshness, business validity, or suitability.
 
+## Exact-period retention
+
+Export one complete cohort file and one file containing only qualifying return activity, then run:
+
+```sh
+python3 plugins/chatdata/scripts/retention.py \
+  --cohorts cohorts.csv --activity activity.csv \
+  --as-of 2026-01-04T00:00:00Z --timezone UTC \
+  --frequency day --periods 4
+```
+
+The default columns are `entity_id,cohort_at` and `entity_id,activity_at`. All timestamps and the exclusive `--as-of` cutoff need explicit UTC offsets; the IANA timezone defines calendar boundaries. The helper fixes cohort membership, keeps every eligible entrant in the denominator, deduplicates qualifying activity by entity and calendar period, and emits null for unfinished periods. It stops on conflicting cohort entries, unknown entities, activity before entry, malformed timestamps, or incomplete required fields. Output contains aggregates without identities or input paths. See the [full retention contract](csv-retention.md) before interpreting the result.
+
+## Join cardinality and measure audit
+
+```sh
+python3 plugins/chatdata/scripts/join_audit.py \
+  --left orders.csv --right items.csv \
+  --left-keys order_id --right-keys order_id \
+  --relationship one-to-many --left-measure revenue
+```
+
+State `one-to-one`, `one-to-many`, `many-to-one`, or `many-to-many` from the intended source grain. Composite keys are accepted after each key flag. The helper reports duplicate and NULL keys, matched and unmatched input rows, and exact INNER and LEFT JOIN output counts using exact text equality. With `--left-measure`, it reconciles decimal totals before and after the join. Exit code 1 blocks violated uniqueness, observed many-to-many fanout, or a repeated left-side measure. Exit code 2 means the extract or arguments were invalid. Results contain only aggregate counts and totals, not keys or rows. A pass applies only to the supplied extracts and equality semantics.
+
+## Optional local DuckDB query
+
+The core plugin remains dependency-free. If your project already uses DuckDB, or you install it in your own environment, ChatData can query an existing local database file without opening it for writes:
+
+```sh
+python3 -m pip install duckdb
+python3 plugins/chatdata/scripts/duckdb_query.py warehouse.duckdb \
+  --sql-file analysis/query.sql --max-rows 1000
+```
+
+The SQL file must contain one `SELECT` or `WITH` statement and be no larger than 1 MB. The adapter rejects additional statements and common write, extension, attach, export, and configuration commands. It opens the existing database read-only, disables external file and URL access plus extension auto-loading, and bounds returned rows from 1 to 10,000. That limit does not bound scanned bytes or query cost. Output includes the result rows, column names, a SQL hash, database size and modification-time fingerprint, elapsed time, and truncation status. The adapter never sends data itself, but your AI client may include command output in a model request under that client's policy. Read-only execution does not prove that the query uses the right grain, definition, or source.
+
 ## Methods
 
 - [Newcombe, 1998: interval estimation for independent proportions](https://pubmed.ncbi.nlm.nih.gov/9595617/)

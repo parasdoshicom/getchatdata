@@ -18,3 +18,5 @@ For reusable work, inspect the analysis record: source version or hash, code/com
 Deliver findings in order of decision impact, each with evidence, correction, and retest. Return supported, supported with limitations, or not supported for the stated conclusion. Record checks not run. Apply straightforward local fixes within scope and rerun relevant checks; do not merely list repairable defects.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#analysis-review) when checking a plausible but unsupported answer.

@@ -11,11 +11,11 @@ def check_bundle(root=None):
     info = json.loads((root / 'scripts/package-info.json').read_text())
     checks = []
 
-    def run(name, args, verify, expected):
-        result = subprocess.run([sys.executable, str(root / 'scripts/analyze.py')] + args,
+    def run(name, args, verify, expected, script='analyze.py', expected_code=0):
+        result = subprocess.run([sys.executable, str(root / 'scripts' / script)] + args,
                                 capture_output=True, text=True, timeout=15)
-        if result.returncode:
-            raise ValueError(name + ': ' + (result.stderr.strip() or 'helper failed'))
+        if result.returncode != expected_code:
+            raise ValueError(name + ': ' + (result.stderr.strip() or result.stdout.strip() or 'helper failed'))
         output = json.loads(result.stdout)
         if not verify(output):
             raise ValueError(name + ': calculated result does not match the bundled fixture')
@@ -32,6 +32,20 @@ def check_bundle(root=None):
     run('Invalid experiment assignment', ['experiment', '--control-n', '1000',
         '--control-success', '100', '--treatment-n', '1500', '--treatment-success', '300'],
         lambda x: x['result'] == 'blocked_srm', 'Withhold winner despite apparent 10% to 20% lift')
+    run('Immature retention', ['--cohorts', str(root / 'examples/retention-cohorts.csv'),
+        '--activity', str(root / 'examples/retention-activity.csv'), '--as-of',
+        '2026-01-04T00:00:00Z', '--timezone', 'UTC', '--frequency', 'day', '--periods', '4'],
+        lambda x: [cell['rate'] for cell in x['cohorts'][0]['cells']] == [0, .5, 0, None]
+        and x['checks']['deduplicated_entity_period_activity_rows'] == 1,
+        'Fixed denominator of 2; rates 0%, 50%, 0%, then unobserved', script='retention.py')
+    run('Join measure inflation', ['--left', str(root / 'examples/join-orders.csv'),
+        '--right', str(root / 'examples/join-items.csv'), '--left-keys', 'order_id',
+        '--right-keys', 'order_id', '--relationship', 'one-to-many', '--left-measure', 'revenue'],
+        lambda x: x['status'] == 'blocked'
+        and x['left_measure_reconciliation']['input_total'] == '30'
+        and x['left_measure_reconciliation']['left_output_total'] == '70',
+        'Block joined revenue of 70; preserve order-grain total of 30',
+        script='join_audit.py', expected_code=1)
     return {'status': 'passed', 'name': info['name'], 'version': info['version'],
             'python': sys.version.split()[0], 'synthetic': True, 'checks': checks,
             'scope': 'Local bundled helpers only. Client skill discovery and connected data are not verified by this check.',

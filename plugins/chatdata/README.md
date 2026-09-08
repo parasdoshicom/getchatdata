@@ -1,6 +1,6 @@
 # ChatData plugin
 
-16 free, open-source data science skills for Claude Code, Codex, and Cursor. See the [repository README](../../README.md) for installation and the [tools guide](references/tools.md) for runnable examples.
+16 free, open-source data science skills for Claude Code, Codex, and Cursor. Seven analytical checks run with the Python standard library; an optional local DuckDB adapter supports bounded read-only queries against an existing database file. See the [repository README](../../README.md) for installation and the [tools guide](references/tools.md) for runnable examples.
 
 The `.claude-plugin` and `.codex-plugin` manifests load the same skill source. Cursor uses the project installer at `../../scripts/install.py`.
 

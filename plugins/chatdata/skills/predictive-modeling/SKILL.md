@@ -18,3 +18,5 @@ Choose complexity only when held-out improvement justifies cost. Inspect stabili
 Deliver a model card with data and split provenance, baseline comparison, threshold rationale, error analysis, training/inference commands, and monitoring signals. Local training can proceed inside agreed resource limits. Deployment, automated decisions about people, or production writes need explicit authorization and appropriate domain review.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#predictive-modeling) when checking a plausible but unsupported answer.

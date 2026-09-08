@@ -22,3 +22,5 @@ If two definitions give different answers, calculate both only if safe and affor
 Deliver the definition, a source mapping, testable boundary cases, and remaining decisions. State when the requested metric cannot be computed from the supplied data.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#metric-definition) when checking a plausible but unsupported answer.

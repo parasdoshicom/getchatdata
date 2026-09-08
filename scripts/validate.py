@@ -22,7 +22,7 @@ for skill in skills:
     assert '\ndescription: ' in text
     for link in re.findall(r'\]\(([^)]+)\)',text):
         if not link.startswith(('https://','http://','#')):
-            assert (skill.parent/link).is_file(),f'Broken link: {skill}: {link}'
+            assert (skill.parent/link.split('#')[0]).is_file(),f'Broken link: {skill}: {link}'
 for file in root.rglob('*.md'):
     if '.git' in file.parts: continue
     for link in re.findall(r'\]\(([^)]+)\)',file.read_text()):
@@ -31,4 +31,14 @@ for file in root.rglob('*.md'):
 assert (root/'LICENSE').read_text()==(plugin/'LICENSE').read_text()
 assert not (plugin/'.mcp.json').exists(),'Free core must not require hosted MCP'
 assert (plugin/'scripts/telemetry.py').is_file() and (plugin/'scripts/claude-statusline.py').is_file()
-print(f'Validated {len(skills)} skills, local links, manifests, MIT license and offline core.')
+for script in ('retention.py', 'join_audit.py', 'duckdb_query.py'):
+    assert (plugin/'scripts'/script).is_file(),f'Missing analytical helper: {script}'
+for skill in skills:
+    assert 'worked-failures.md#' in skill.read_text(),f'Missing worked failure link: {skill}'
+enforcement_path=root/'evals/results'/f'enforcement-v{claude["version"]}.json'
+assert enforcement_path.is_file(),f'Missing enforcement evidence: {enforcement_path.name}'
+enforcement=json.loads(enforcement_path.read_text())
+assert enforcement['plugin_version']==claude['version']
+assert enforcement['passed']==enforcement['total']==5
+assert len(enforcement['cases'])==5 and all(case['passed'] is True for case in enforcement['cases'])
+print(f'Validated {len(skills)} skills, local links, manifests, MIT license, analytical helpers and enforcement evidence.')

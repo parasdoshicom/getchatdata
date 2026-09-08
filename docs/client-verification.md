@@ -6,7 +6,7 @@ Checked September 7, 2026. These are reproducible setup and representative workf
 
 The suite contains 40 tests covering analytical calculations, invalid inputs, setup checks from installed paths, update backups, rollback after a failed update, and preservation of unrelated skills. CI runs on Python 3.9, 3.12 and 3.13. The package validator checks 16 skills, manifests, internal links and licensing.
 
-The setup helper runs three synthetic cases: a rate falling from 17% to 8% entirely because of mix; a mature ordered funnel of 3 → 2 → 1; and an experiment whose assignment imbalance blocks a winner decision.
+The setup helper runs five synthetic cases: a rate falling from 17% to 8% entirely because of mix; a mature ordered funnel of 3 → 2 → 1; an experiment whose assignment imbalance blocks a winner decision; an immature retention cell that stays unobserved; and a multiplied join total that is blocked.
 
 ## Live client checks
 

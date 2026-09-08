@@ -1,6 +1,6 @@
 # What ChatData can do
 
-ChatData is built for one person doing serious data work with an AI coding client. It gives that client 16 data science skills, a shared working agreement, five runnable calculations, two synthetic datasets, and a reusable analysis-record format.
+ChatData is built for one person doing serious data work with an AI coding client. It gives that client 16 data science skills, a shared working agreement, seven runnable analytical checks, six synthetic example files, and a reusable analysis-record format.
 
 The aim is practical: help one data scientist move from a question to a checked, rerunnable answer without needing another specialist beside them. ChatData does not claim that installing a prompt file creates expertise or produces a measured 10× gain. It makes the methods, checks, deliverables, and stopping conditions explicit so the person using the model can demand better work.
 
@@ -34,7 +34,7 @@ Use this when you have a business question, dataset, query, or decision but are 
 
 **Expect:** a clear question, the selected method and reason, inspected sources, calculations or code, checked outputs, a result tied to the decision, and an analysis record when requested.
 
-**Limit:** the routing skill does not create access to a database or make an unsupported question measurable. Its setup doctor verifies three bundled calculations. That does not prove client skill discovery, live-source access, or the correctness of every later model response.
+**Limit:** the routing skill does not create access to a database or make an unsupported question measurable. Its setup doctor verifies five bundled calculations. That does not prove client skill discovery, live-source access, or the correctness of every later model response.
 
 ## 2. Metric definition
 
@@ -314,9 +314,9 @@ Use this before relying on an important analysis, including work produced with C
 
 **Limit:** review can verify only what it can inspect. Missing inputs or reproducibility block a claim that the result was independently verified; they do not justify invented evidence.
 
-## The five bundled calculations
+## The seven bundled analytical checks
 
-The skills can use the Python, SQL, notebook, visualization, and data tools already available in your environment. ChatData also ships a small Python helper for five common checks. It uses only the Python 3.9+ standard library.
+The skills can use the Python, SQL, notebook, visualization, and data tools already available in your environment. ChatData also ships small Python helpers for seven common checks. They use only the Python 3.9+ standard library.
 
 | Command | What it calculates | Main guardrail |
 | --- | --- | --- |
@@ -325,8 +325,10 @@ The skills can use the Python, SQL, notebook, visualization, and data tools alre
 | `funnel` | Closed, ordered, user-level funnel from a CSV | Enforces strict order and fully mature conversion windows |
 | `decompose` | Before/after rate change split into mix and within-segment contributions | Requires an exhaustive partition and reconciles contributions to the total |
 | `profile` | CSV rows, columns, missingness, duplicate rows, and duplicate keys | Does not print raw cell values or claim that structure proves business validity |
+| `retention.py` | Exact daily, weekly, or monthly cohort retention from separate cohort and activity CSVs | Masks incomplete periods, fixes denominators, and rejects ambiguous membership or pre-entry activity |
+| `join_audit.py` | Equality-join cardinality, output rows, and optional measure reconciliation for two CSV extracts | Blocks violated uniqueness, many-to-many fanout, and duplicated measures |
 
-Every helper emits JSON. File-based commands include an input SHA-256 hash so a later record can say exactly which local file was analyzed. The detailed commands, formats, formulas, and method sources are in [Runnable analysis checks](../plugins/chatdata/references/tools.md).
+Every helper emits JSON. The original file-based commands include an input SHA-256 hash; the retention and join helpers instead return aggregates without input paths, row values, or keys. The detailed commands, formats, formulas, and method sources are in [Runnable analysis checks](../plugins/chatdata/references/tools.md).
 
 ## What a reusable answer contains
 
@@ -348,6 +350,6 @@ The record starts as **proposed**. It becomes **reviewed by user** only after a 
 
 ## What ChatData does not provide
 
-ChatData does not include a database connector, managed data service, automatic experiment launcher, or model host. It does not provide automatic cross-client memory or guarantee that a model will follow every instruction. The local helper checks are deliberately small and inspectable. The 16 skills guide the model in using the authorized tools already present in your client and project.
+ChatData includes an optional, read-only adapter for an existing local DuckDB file. It does not include a managed warehouse connection, managed data service, automatic experiment launcher, or model host. It does not provide automatic cross-client memory or guarantee that a model will follow every instruction. The local helper checks are deliberately small and inspectable. The 16 skills guide the model in using the authorized tools already present in your client and project.
 
-The public [evaluation guide](evaluation.md) explains how to test model behavior in fresh sessions with synthetic cases. It also explains how to retain prompts and outputs, and how to compare results without revealing expected answers to the model.
+The public [evaluation guide](evaluation.md) includes the measured planted-defect enforcement check and explains how to compare fresh model sessions without revealing conditions to the reviewer.

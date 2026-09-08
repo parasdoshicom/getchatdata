@@ -18,3 +18,5 @@ For associations, check time trends, confounding, selection, Simpson's paradox, 
 Deliver a concise data map, a few decision-relevant findings with supporting calculations, unresolved data problems, and ranked questions worth testing next. Include rerunnable code and a record of transformations; do not dump every chart.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#exploratory-analysis) when checking a plausible but unsupported answer.

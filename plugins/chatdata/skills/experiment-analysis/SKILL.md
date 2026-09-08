@@ -18,3 +18,5 @@ Distinguish evidence of benefit from enough benefit to act. An interval crossing
 Return the estimand, counts, exclusions, effect and uncertainty, SRM, guardrails, decision, and next evidence needed. A script's candidate result is never an automatic ship decision. If the design or a guardrail is missing, label the recommendation conditional. Save exact inputs and commands.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#experiment-analysis) when checking a plausible but unsupported answer.

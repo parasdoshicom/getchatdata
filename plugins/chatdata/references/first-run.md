@@ -15,10 +15,12 @@ The agent reads the installed skill, resolves `scripts/doctor.py` in that instal
 - Mix: conversion falls from 17% to 8%, with the full 9 percentage-point drop explained by customer mix.
 - Funnel: 3 visits, 2 signups, 1 purchase after handling ordering, duplicates and the observation window.
 - Experiment: a 10% versus 20% result cannot be called a winner because observed assignment counts disagree with the planned allocation.
+- Retention: a denominator of two stays fixed, duplicate returns count once, and an unfinished cell remains unobserved.
+- Join: order-grain revenue is 30, while the multiplied join produces 70 and is blocked.
 
 The agent then uses root-cause for the requested mix analysis, runs the helper, explains that arithmetic contribution does not establish what caused the mix to change, and writes the definition, command, result, checks and caveats into the agreed folder. Label the example synthetic and the record proposed until the user actually reviews it. Never invent a reviewer or review date.
 
-Save only the requested analysis record for this synthetic run; do not create client memory or write outside the agreed project. Show the user the output path and the result. Three passing helper checks do not prove live data access, that every skill was loaded, or that future model answers will be correct.
+Save only the requested analysis record for this synthetic run; do not create client memory or write outside the agreed project. Show the user the output path and the result. Five passing helper checks do not prove live data access, that every skill was loaded, or that future model answers will be correct.
 
 ## Pick up the work next time
 
