@@ -377,7 +377,7 @@ def render(report):
         lines.append("  Hourly value        $%s/hour (dashboard setting)" % summary["hourly_value_usd"])
         if summary["estimated_hours_saved"] is not None \
                 and summary["estimated_value_usd"] is not None:
-            lines.append("  Estimated saved     %s hours · $%s (cached)" %
+            lines.append("  Estimated saved     %.1f hours · $%.0f (cached)" %
                          (summary["estimated_hours_saved"], summary["estimated_value_usd"]))
         else:
             lines.append("  Estimated saved     unavailable")

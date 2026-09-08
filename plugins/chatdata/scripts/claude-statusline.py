@@ -219,7 +219,7 @@ else:
         hours = summary.get("estimated_hours_saved")
         value = summary.get("estimated_value_usd")
         if valid_number(hours) and valid_number(value):
-            pieces.extend((f"{hours:.1f}h est. saved", f"${value:,.2f} est. value"))
+            pieces.extend((f"{hours:.1f}h est. saved", f"${value:,.0f} est. value"))
         else:
             pieces.append("estimates unavailable")
     elif estimates_configured is False or estimates_configured is None:
