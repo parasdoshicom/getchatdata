@@ -1,5 +1,13 @@
 # Changes
 
+## 1.6.1 — September 8, 2026
+
+- Replaced the dashboard's manual installation-token prompt with one email-linked command. Its single-use setup code expires after 20 minutes and is exchanged automatically for a revocable local credential.
+- Made linking work noninteractively inside Claude Code, Codex, and Cursor. Claude Code no longer fails because its shell has no controlling TTY.
+- Made a linked installation required for the official ChatData analytical workflow. When the current client is unlinked, the skills stop before reading user data or producing an analysis and point to the email-linked dashboard command.
+- Kept usage events content-free: they still exclude prompts, files, paths, project identity, queries, results, model details, token counts, and provider costs.
+- Kept the previous manual token flow as a compatibility fallback for older setup routes.
+
 ## 1.5.0 — September 7, 2026
 
 - Added a read-only local status report with link state, cached usage, pending events, and a useful next step. Use `status.py --check` to include the synthetic setup checks.

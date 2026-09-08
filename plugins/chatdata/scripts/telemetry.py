@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in, content-free usage tracking for explicit ChatData workflows."""
+"""Content-free usage tracking for explicit ChatData workflows."""
 import argparse
 import getpass
 import hashlib
@@ -167,10 +167,11 @@ def _request(method, path, token, payload=None, timeout=3):
     loopback_test = parsed_origin.scheme == "http" and parsed_origin.hostname in {"127.0.0.1", "localhost"}
     if not production and not loopback_test:
         raise RuntimeError("ChatData usage reporting only connects to getchatdata.com or a loopback test server.")
-    request = Request(origin + path, data=data, method=method,
-                      headers={"Authorization": "Bearer " + token,
-                               "Content-Type": "application/json",
-                               "User-Agent": "ChatData-individual/" + _version()})
+    headers = {"Content-Type": "application/json",
+               "User-Agent": "ChatData-individual/" + _version()}
+    if token is not None:
+        headers["Authorization"] = "Bearer " + token
+    request = Request(origin + path, data=data, method=method, headers=headers)
     try:
         with urlopen(request, timeout=timeout) as response:
             raw_response = response.read().decode("utf-8")
@@ -474,13 +475,42 @@ def claude_hook():
         payload = json.load(sys.stdin)
     except (ValueError, TypeError):
         return
-    if not _installation_config("claude-code") or not isinstance(payload, dict):
+    if not isinstance(payload, dict):
+        return
+    event_name = payload.get("hook_event_name")
+    if event_name == "UserPromptExpansion":
+        skill_id = _skill_slug(payload.get("command_name"))
+    elif event_name == "PreToolUse":
+        tool = payload.get("tool_input", {})
+        skill_id = None
+        if isinstance(tool, dict):
+            for field in ("skill", "name", "skill_name", "command"):
+                skill_id = _skill_slug(tool.get(field))
+                if skill_id:
+                    break
+    else:
+        skill_id = None
+    if not _installation_config("claude-code"):
+        if skill_id:
+            reason = (
+                "ChatData usage is not linked to a verified dashboard email. "
+                "Stop before reading user data or running analysis. Open "
+                "https://getchatdata.com/dashboard, create and run the email-linked "
+                "Claude Code command, then retry this ChatData skill."
+            )
+            response = {"systemMessage": reason}
+            if event_name == "PreToolUse":
+                response["hookSpecificOutput"] = {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": reason,
+                }
+            print(json.dumps(response, separators=(",", ":")))
         return
     session_id = payload.get("session_id")
     if not isinstance(session_id, str) or not session_id:
         return
     key = _session_key(session_id)
-    event_name = payload.get("hook_event_name")
     state_path = paths()["state"]
     with _locked():
         state = _read_json(state_path, {})
@@ -488,16 +518,6 @@ def claude_hook():
         if not isinstance(active, dict):
             active = {}
         if event_name in ("UserPromptExpansion", "PreToolUse"):
-            if event_name == "UserPromptExpansion":
-                skill_id = _skill_slug(payload.get("command_name"))
-            else:
-                tool = payload.get("tool_input", {})
-                skill_id = None
-                if isinstance(tool, dict):
-                    for field in ("skill", "name", "skill_name", "command"):
-                        skill_id = _skill_slug(tool.get(field))
-                        if skill_id:
-                            break
             if skill_id and key not in active:
                 workflow_id = str(uuid.uuid4())
                 queued = _queue_records()
@@ -553,17 +573,36 @@ def restore_statusline():
     return _footer_module().restore()
 
 
-def connect(client, enable_statusline=False, accept_usage_disclosure=False):
+def connect(client, enable_statusline=False, accept_usage_disclosure=False,
+            email=None, link_code=None):
     print("ChatData usage tracking sends only workflow IDs, event times, client, skill, plugin version, and elapsed seconds.")
     print("It never sends prompts, files, paths, project names, queries, results, model details, or session IDs.")
     if not accept_usage_disclosure:
         answer = input("Link this installation and send that metadata? [y/N] ").strip().lower()
         if answer not in ("y", "yes"):
             return {"telemetry": "not_linked", "consent": False}
-    token = getpass.getpass("Paste the installation token from your ChatData dashboard: ").strip()
-    if not re.fullmatch(r"cdi_[A-Za-z0-9_-]{43}", token):
-        raise ValueError("The installation token is not valid.")
-    remote = _request("GET", "/api/individual/config", token)
+    if bool(email) != bool(link_code):
+        raise ValueError("Use both --email and --link-code from the dashboard command.")
+    if email and link_code:
+        normalized_email = email.strip().lower()
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", normalized_email):
+            raise ValueError("The dashboard email is not valid.")
+        if not re.fullmatch(r"cdl_[A-Za-z0-9_-]{43}", link_code):
+            raise ValueError("The email-linked setup code is not valid.")
+        remote = _request("POST", "/api/individual/installations/claim", None, {
+            "email": normalized_email,
+            "client": client,
+            "consent_version": CONSENT_VERSION,
+            "link_code": link_code,
+        }, timeout=10)
+        token = remote.get("token", "")
+        if not re.fullmatch(r"cdi_[A-Za-z0-9_-]{43}", token):
+            raise ValueError("ChatData did not return a valid installation credential.")
+    else:
+        token = getpass.getpass("Paste the installation token from your ChatData dashboard: ").strip()
+        if not re.fullmatch(r"cdi_[A-Za-z0-9_-]{43}", token):
+            raise ValueError("The installation token is not valid.")
+        remote = _request("GET", "/api/individual/config", token)
     if remote.get("client") != client or remote.get("consent_version") != CONSENT_VERSION:
         raise ValueError("That installation token belongs to a different client or consent version.")
     config = _config() or {"consent_version": CONSENT_VERSION, "installations": {}}
@@ -623,6 +662,8 @@ def main():
     link.add_argument("--client", choices=sorted(CLIENTS), required=True)
     link.add_argument("--enable-statusline", action="store_true")
     link.add_argument("--accept-usage-disclosure", action="store_true")
+    link.add_argument("--email")
+    link.add_argument("--link-code")
     begin = commands.add_parser("start")
     begin.add_argument("--client", choices=sorted(CLIENTS), required=True)
     begin.add_argument("--skill-id", choices=sorted(SKILLS), required=True)
@@ -642,7 +683,8 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "connect":
-            result = connect(args.client, args.enable_statusline, args.accept_usage_disclosure)
+            result = connect(args.client, args.enable_statusline, args.accept_usage_disclosure,
+                             args.email, args.link_code)
         elif args.command == "start":
             result = start(args.client, args.skill_id, args.no_flush)
         elif args.command == "complete":

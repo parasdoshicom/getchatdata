@@ -4,7 +4,7 @@
 
 Your open-source data science workspace, ready to install. ChatData brings together 16 analysis skills, runnable Python checks, synthetic examples, and reusable record templates for Claude Code, Codex, and Cursor. It helps one person frame a question, run the analysis, challenge the conclusion, and save the evidence locally for the next session.
 
-ChatData code is MIT licensed and open source (the bundled Apache Ossie schema retains its Apache 2.0 license), with no trial, license key, or paid feature tier. The official download starts with a free personal account. After installation, you can link content-free usage reporting to see how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
+ChatData code is MIT licensed and open source (the bundled Apache Ossie schema retains its Apache 2.0 license), with no trial, license key, or paid feature tier. The official ChatData workflow starts with a free personal account and requires its install to stay linked to that verified email. This gives you a usage dashboard showing how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
 
 [Install](#install) · [Try it on synthetic data](#first-run-get-one-useful-answer) · [Explore all 16 capabilities](docs/capabilities.md) · [Privacy](docs/privacy.md) · [Source](https://github.com/parasdoshicom/getchatdata)
 
@@ -14,7 +14,7 @@ You could assemble this yourself: write Markdown skill files, package them for e
 
 The skills ask your agent to save the question, metric definition, source, code, checked outputs, caveats, and conditions that would invalidate the answer in a local folder you choose. Keep that folder and point the next session at it. The agent can inspect the record, rerun the calculation, and recheck changed inputs before continuing.
 
-The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery, update notices, and optional usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
+The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery, update notices, and linked usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
 
 ## Start with the work already on your machine
 
@@ -59,7 +59,7 @@ Try a focused skill directly:
 /chatdata:experiment-analysis Check whether this A/B result is trustworthy.
 ```
 
-The plugin uses the ChatData name, command namespace, and startup hooks. The discovery hook reports the installed version and how to start. If you link usage reporting, separate hooks count explicit ChatData skill invocations and when that turn finishes. They do not send the prompt or answer.
+The plugin uses the ChatData name, command namespace, and startup hooks. The discovery hook reports the installed version and how to start. After you run your dashboard's linked install command, separate hooks count explicit ChatData skill invocations and when that turn finishes. They do not send the prompt or answer.
 
 If another installed ChatData package uses the same `/chatdata:` namespace, enable one version for a session so the client does not select the wrong skill root.
 
@@ -109,7 +109,7 @@ On update, the installer moves the old ChatData folders, including local edits, 
 
 ## Link your personal usage dashboard
 
-Dashboard linking is part of the standard setup in your [ChatData dashboard](https://getchatdata.com/dashboard). The setup page explains usage reporting, creates one installation token per client, and provides a combined install-and-link command. The token appears once. Enter it through the hidden prompt so it does not become part of your shell history.
+Dashboard linking is part of the standard setup in your [ChatData dashboard](https://getchatdata.com/dashboard). Sign in by email, choose your client, and create one combined install-and-link command. The command is already linked to your verified email. It runs without an interactive prompt, including inside Claude Code.
 
 From the cloned repository root, link Claude Code to your dashboard:
 
@@ -124,7 +124,7 @@ python3 plugins/chatdata/scripts/telemetry.py connect --client codex
 python3 plugins/chatdata/scripts/telemetry.py connect --client cursor
 ```
 
-The dashboard setup notice lists usage fields before you create a token. Its generated command includes `--accept-usage-disclosure` to avoid asking the same question again in the terminal; the token is still entered privately and verified. A direct `connect` command without that flag shows the consent prompt. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
+Before creating the command, the dashboard lists every usage field ChatData receives. The command contains a single-use setup code tied to your verified email and selected client. The code expires after 20 minutes, is exchanged automatically for a revocable local installation credential, and cannot be reused. A direct `connect` command remains available as a compatibility fallback. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
 
 The dashboard calls these **tracked ChatData prompts** and **completed workflows**. Estimated time saved is `max(your baseline minutes − observed elapsed minutes, 0)` for each completed workflow. Estimated value multiplies that time by the hourly value you entered. These are user-configured estimates. They are not measured productivity gains or reductions in an AI provider bill. Elapsed time can include idle time.
 
@@ -134,7 +134,7 @@ Claude Code can show both estimates in its status line:
 ChatData · 1.2h estimated saved · $187.50 estimated value
 ```
 
-On the first Claude Code session after installation, ChatData replaces the configured footer with its own branding. It keeps a local backup of your previous footer, including Woz or a custom command, but does not run or display it. Usage reporting still requires the separate consent prompt above. Local disconnect restores the previous setting if it has not changed in the meantime. If you choose another footer later, ChatData respects that choice. To restore your previous Claude footer without disconnecting usage, run `/chatdata:footer restore` in Claude Code. Use `/chatdata:footer enable` to choose ChatData again, or `/chatdata:footer status` to inspect it. You can also restore from the cloned repository root:
+On the first Claude Code session after installation, ChatData replaces the configured footer with its own branding. It keeps a local backup of your previous footer, including Woz or a custom command, but does not run or display it. The email-linked dashboard command enables usage reporting after showing the disclosure. Local disconnect restores the previous setting if it has not changed in the meantime. If you choose another footer later, ChatData respects that choice. To restore your previous Claude footer without disconnecting usage, run `/chatdata:footer restore` in Claude Code. Use `/chatdata:footer enable` to choose ChatData again, or `/chatdata:footer status` to inspect it. You can also restore from the cloned repository root:
 
 ```sh
 python3 plugins/chatdata/scripts/footer.py restore
@@ -267,9 +267,9 @@ A record starts as **proposed**. It becomes **reviewed by user** only when a per
 
 ## Privacy
 
-The project installer, setup doctor, analytical helper, and unlinked skills do not send usage events. The doctor makes no network requests or file writes. The helper reads only the path supplied to it and prints its result locally.
+The project installer and setup doctor do not send usage events. The doctor makes no network requests or file writes. The analytical helper reads only the path supplied to it and prints its result locally. The official ChatData skills check for a linked installation before analyzing user data; setup and repair commands remain available while unlinked.
 
-Usage reporting starts only after you create an installation token in the dashboard, run `connect`, and accept the local consent prompt. It reports fixed workflow metadata and excludes the content of the work. Events never contain prompts, conversations, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs. Your account email is stored with your personal account, but it is not placed in usage events.
+Usage reporting starts only after you review the disclosure and run the email-linked command from your dashboard. It reports fixed workflow metadata and excludes the content of the work. Events never contain prompts, conversations, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs. Your account email is stored with your personal account, but it is not placed in usage events.
 
 Your AI client may still send prompts, selected files, and tool output to its model provider. Connected warehouses and other tools have their own policies. Installing or updating from this repository contacts GitHub. Visiting the website and using the personal dashboard contacts ChatData's website services. “The helper runs locally” does not mean a cloud AI model keeps everything on-device.
 

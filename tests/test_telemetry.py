@@ -14,6 +14,7 @@ from test_analysis import P, load
 T = load("telemetry", P / "scripts/telemetry.py")
 TOKEN = "cdi_" + "a" * 43
 TOKEN_2 = "cdi_" + "b" * 43
+LINK_CODE = "cdl_" + "c" * 43
 SUMMARY = {
     "tracked_prompts": 3,
     "completed_workflows": 2,
@@ -100,6 +101,32 @@ class TelemetryTests(unittest.TestCase):
         self.assertNotIn(TOKEN, json.dumps(result))
         self.assertEqual(T._installation_config("claude-code")["token"], TOKEN)
 
+    def test_email_linked_connect_is_non_interactive_and_exchanges_one_time_code(self):
+        remote = {"ok": True, "token": TOKEN, "client": "claude-code",
+                  "consent_version": T.CONSENT_VERSION,
+                  "account_summary": SUMMARY}
+        with patch("builtins.input", side_effect=AssertionError("must not prompt")), \
+             patch.object(T.getpass, "getpass", side_effect=AssertionError("must not require a TTY")), \
+             patch.object(T, "_request", return_value=remote) as request:
+            result = T.connect("claude-code", accept_usage_disclosure=True,
+                               email="HELLO@getchatdata.com", link_code=LINK_CODE)
+        request.assert_called_once_with(
+            "POST", "/api/individual/installations/claim", None,
+            {"email": "hello@getchatdata.com", "client": "claude-code",
+             "consent_version": T.CONSENT_VERSION, "link_code": LINK_CODE},
+            timeout=10,
+        )
+        self.assertEqual(result["telemetry"], "linked")
+        self.assertEqual(T._installation_config("claude-code")["token"], TOKEN)
+        self.assertNotIn(LINK_CODE, json.dumps(T._config()))
+
+    def test_email_link_requires_email_and_one_time_code_together(self):
+        with patch.object(T, "_request") as request:
+            with self.assertRaisesRegex(ValueError, "both --email and --link-code"):
+                T.connect("codex", accept_usage_disclosure=True,
+                          email="hello@getchatdata.com")
+        request.assert_not_called()
+
     def test_disclosed_dashboard_connect_still_rejects_invalid_or_wrong_client_token(self):
         with patch("builtins.input", side_effect=AssertionError("yes/no prompt must be skipped")), \
              patch.object(T.getpass, "getpass", return_value="not-a-token"), \
@@ -122,13 +149,22 @@ class TelemetryTests(unittest.TestCase):
         with patch.object(sys, "argv", ["telemetry.py", "connect", "--client", "cursor"]), \
              patch.object(T, "connect", return_value={}) as connect:
             self.assertEqual(T.main(), 0)
-        connect.assert_called_once_with("cursor", False, False)
+        connect.assert_called_once_with("cursor", False, False, None, None)
 
         with patch.object(sys, "argv", ["telemetry.py", "connect", "--client", "cursor",
                                              "--accept-usage-disclosure"]), \
              patch.object(T, "connect", return_value={}) as connect:
             self.assertEqual(T.main(), 0)
-        connect.assert_called_once_with("cursor", False, True)
+        connect.assert_called_once_with("cursor", False, True, None, None)
+
+        with patch.object(sys, "argv", ["telemetry.py", "connect", "--client", "claude-code",
+                                             "--email", "hello@getchatdata.com",
+                                             "--link-code", LINK_CODE,
+                                             "--accept-usage-disclosure"]), \
+             patch.object(T, "connect", return_value={}) as connect:
+            self.assertEqual(T.main(), 0)
+        connect.assert_called_once_with(
+            "claude-code", False, True, "hello@getchatdata.com", LINK_CODE)
 
     def test_connect_rejects_token_for_a_different_client(self):
         remote = {"ok": True, "client": "cursor", "consent_version": T.CONSENT_VERSION,
@@ -304,6 +340,30 @@ class TelemetryTests(unittest.TestCase):
         with patch.object(sys, "stdin", io.StringIO(json.dumps(payload))):
             T.claude_hook()
         self.assertEqual(T._queue_events(), [])
+
+    def test_unlinked_claude_skill_is_denied_with_dashboard_recovery(self):
+        payload = {"hook_event_name": "PreToolUse", "session_id": "s1",
+                   "tool_input": {"skill": "chatdata:root-cause"}}
+        output = io.StringIO()
+        with patch.object(sys, "stdin", io.StringIO(json.dumps(payload))), \
+             patch.object(sys, "stdout", output):
+            T.claude_hook()
+        response = json.loads(output.getvalue())
+        self.assertEqual(response["hookSpecificOutput"]["permissionDecision"], "deny")
+        self.assertIn("verified dashboard email", response["systemMessage"])
+        self.assertIn("getchatdata.com/dashboard", response["systemMessage"])
+        self.assertFalse(T.paths()["queue"].exists())
+
+    def test_unlinked_direct_command_instructs_claude_to_stop(self):
+        payload = {"hook_event_name": "UserPromptExpansion", "session_id": "s1",
+                   "command_name": "chatdata:sql-review"}
+        output = io.StringIO()
+        with patch.object(sys, "stdin", io.StringIO(json.dumps(payload))), \
+             patch.object(sys, "stdout", output):
+            T.claude_hook()
+        response = json.loads(output.getvalue())
+        self.assertIn("Stop before reading user data", response["systemMessage"])
+        self.assertNotIn("hookSpecificOutput", response)
 
     def test_statusline_replaces_existing_command_and_explicit_restore_is_exact(self):
         original = {"type": "command", "command": "printf 'WOZ saved'", "padding": 2}

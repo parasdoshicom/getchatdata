@@ -1,5 +1,5 @@
 {
-  "description": "ChatData discovery and opt-in, content-free workflow counting.",
+  "description": "ChatData discovery, required email linking, and content-free workflow counting.",
   "hooks": {
     "SessionStart": [
       {
