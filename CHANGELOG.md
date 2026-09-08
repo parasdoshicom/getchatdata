@@ -1,5 +1,10 @@
 # Changes
 
+## 1.4.1 — September 7, 2026
+
+- Made dashboard linking part of the standard website setup, with a visible usage notice and a combined install-and-link command.
+- Added an explicit setup flag to avoid repeating the dashboard disclosure question in the terminal. Tokens remain private, verified, and revocable.
+
 ## 1.4.0 — September 7, 2026
 
 - Made ChatData the Claude Code footer on the first session after installation, with ChatData branding, savings estimates, and release notices.

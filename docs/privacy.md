@@ -27,7 +27,7 @@ The official download asks for an email address and sends a sign-in link. By sig
 
 The dashboard creates a different installation token for each client you link. The token is shown once. ChatData stores a hash of it on the server rather than the token itself. Enter the token through the reporter's hidden prompt so it does not become part of shell history. Local configuration keeps each token separate, and each queued event is bound to a one-way fingerprint of the token that created it.
 
-Usage reporting starts only after you create a dashboard token, run `telemetry.py connect`, and accept the local consent prompt. An existing unlinked installation remains local and fully usable.
+The standard dashboard setup includes usage linking and displays the reporting notice before token creation. Its install command passes `--accept-usage-disclosure`, then asks for the token privately and verifies it. Direct setup without that flag still asks for confirmation. Usage reporting starts only after you create a dashboard token, run `telemetry.py connect`, and accept the local consent prompt. An existing unlinked installation remains local and fully usable.
 
 For an explicit ChatData workflow, a linked installation can send only these event fields:
 

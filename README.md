@@ -101,7 +101,7 @@ On update, the installer moves the old ChatData folders, including local edits, 
 
 ## Link your personal usage dashboard
 
-Create one installation token for each client in your [ChatData dashboard](https://getchatdata.com/dashboard). The token appears once. Enter it through the hidden prompt so it does not become part of your shell history.
+Dashboard linking is part of the standard setup in your [ChatData dashboard](https://getchatdata.com/dashboard). The setup page explains usage reporting, creates one installation token per client, and provides a combined install-and-link command. The token appears once. Enter it through the hidden prompt so it does not become part of your shell history.
 
 From the cloned repository root, link Claude Code to your dashboard:
 
@@ -116,7 +116,7 @@ python3 plugins/chatdata/scripts/telemetry.py connect --client codex
 python3 plugins/chatdata/scripts/telemetry.py connect --client cursor
 ```
 
-The consent prompt lists the complete event fields before anything is saved or sent. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
+The dashboard setup notice lists usage fields before you create a token. Its generated command includes `--accept-usage-disclosure` to avoid asking the same question again in the terminal; the token is still entered privately and verified. A direct `connect` command without that flag shows the consent prompt. A linked installation reports one start for an explicit ChatData workflow and one completion when that workflow finishes. It sends random event and workflow IDs, event time, client, selected skill, plugin version, and elapsed seconds. It does not send email addresses in events, prompts, files, paths, project or repository names, session IDs, SQL or other queries, results, model details, token counts, or provider costs.
 
 The dashboard calls these **tracked ChatData prompts** and **completed workflows**. Estimated time saved is `max(your baseline minutes − observed elapsed minutes, 0)` for each completed workflow. Estimated value multiplies that time by the hourly value you entered. These are user-configured estimates. They are not measured productivity gains or reductions in an AI provider bill. Elapsed time can include idle time.
 

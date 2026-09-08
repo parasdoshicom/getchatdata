@@ -86,6 +86,50 @@ class TelemetryTests(unittest.TestCase):
         self.assertFalse(T.paths()["config"].exists())
         request.assert_not_called()
 
+    def test_disclosed_dashboard_connect_skips_yes_no_but_keeps_hidden_token_verification(self):
+        remote = {"ok": True, "client": "claude-code",
+                  "consent_version": T.CONSENT_VERSION,
+                  "account_summary": SUMMARY}
+        with patch("builtins.input", side_effect=AssertionError("yes/no prompt must be skipped")), \
+             patch.object(T.getpass, "getpass", return_value=TOKEN) as hidden_prompt, \
+             patch.object(T, "_request", return_value=remote) as request:
+            result = T.connect("claude-code", accept_usage_disclosure=True)
+        hidden_prompt.assert_called_once()
+        request.assert_called_once_with("GET", "/api/individual/config", TOKEN)
+        self.assertEqual(result["telemetry"], "linked")
+        self.assertNotIn(TOKEN, json.dumps(result))
+        self.assertEqual(T._installation_config("claude-code")["token"], TOKEN)
+
+    def test_disclosed_dashboard_connect_still_rejects_invalid_or_wrong_client_token(self):
+        with patch("builtins.input", side_effect=AssertionError("yes/no prompt must be skipped")), \
+             patch.object(T.getpass, "getpass", return_value="not-a-token"), \
+             patch.object(T, "_request") as request:
+            with self.assertRaisesRegex(ValueError, "not valid"):
+                T.connect("codex", accept_usage_disclosure=True)
+        request.assert_not_called()
+
+        remote = {"ok": True, "client": "cursor",
+                  "consent_version": T.CONSENT_VERSION,
+                  "account_summary": SUMMARY}
+        with patch("builtins.input", side_effect=AssertionError("yes/no prompt must be skipped")), \
+             patch.object(T.getpass, "getpass", return_value=TOKEN), \
+             patch.object(T, "_request", return_value=remote):
+            with self.assertRaisesRegex(ValueError, "different client"):
+                T.connect("codex", accept_usage_disclosure=True)
+        self.assertIsNone(T._config())
+
+    def test_cli_disclosure_flag_is_explicit_and_defaults_off(self):
+        with patch.object(sys, "argv", ["telemetry.py", "connect", "--client", "cursor"]), \
+             patch.object(T, "connect", return_value={}) as connect:
+            self.assertEqual(T.main(), 0)
+        connect.assert_called_once_with("cursor", False, False)
+
+        with patch.object(sys, "argv", ["telemetry.py", "connect", "--client", "cursor",
+                                             "--accept-usage-disclosure"]), \
+             patch.object(T, "connect", return_value={}) as connect:
+            self.assertEqual(T.main(), 0)
+        connect.assert_called_once_with("cursor", False, True)
+
     def test_connect_rejects_token_for_a_different_client(self):
         remote = {"ok": True, "client": "cursor", "consent_version": T.CONSENT_VERSION,
                   "account_summary": SUMMARY}

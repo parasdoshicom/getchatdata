@@ -551,12 +551,13 @@ def restore_statusline():
     return _footer_module().restore()
 
 
-def connect(client, enable_statusline=False):
+def connect(client, enable_statusline=False, accept_usage_disclosure=False):
     print("ChatData usage tracking sends only workflow IDs, event times, client, skill, plugin version, and elapsed seconds.")
     print("It never sends prompts, files, paths, project names, queries, results, model details, or session IDs.")
-    answer = input("Link this installation and send that metadata? [y/N] ").strip().lower()
-    if answer not in ("y", "yes"):
-        return {"telemetry": "not_linked", "consent": False}
+    if not accept_usage_disclosure:
+        answer = input("Link this installation and send that metadata? [y/N] ").strip().lower()
+        if answer not in ("y", "yes"):
+            return {"telemetry": "not_linked", "consent": False}
     token = getpass.getpass("Paste the installation token from your ChatData dashboard: ").strip()
     if not re.fullmatch(r"cdi_[A-Za-z0-9_-]{43}", token):
         raise ValueError("The installation token is not valid.")
@@ -619,6 +620,7 @@ def main():
     link = commands.add_parser("connect")
     link.add_argument("--client", choices=sorted(CLIENTS), required=True)
     link.add_argument("--enable-statusline", action="store_true")
+    link.add_argument("--accept-usage-disclosure", action="store_true")
     begin = commands.add_parser("start")
     begin.add_argument("--client", choices=sorted(CLIENTS), required=True)
     begin.add_argument("--skill-id", choices=sorted(SKILLS), required=True)
@@ -638,7 +640,7 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == "connect":
-            result = connect(args.client, args.enable_statusline)
+            result = connect(args.client, args.enable_statusline, args.accept_usage_disclosure)
         elif args.command == "start":
             result = start(args.client, args.skill_id, args.no_flush)
         elif args.command == "complete":
