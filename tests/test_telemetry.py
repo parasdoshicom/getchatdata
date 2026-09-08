@@ -300,6 +300,8 @@ class TelemetryTests(unittest.TestCase):
     def test_working_agreement_gives_actionable_flush_without_permission_bypass(self):
         agreement = (P / "references/working-agreement.md").read_text()
         self.assertIn('python3 "<resolved telemetry.py path>" flush', agreement)
+        self.assertIn('python3 "<resolved status.py path>" --json', agreement)
+        self.assertIn("clients.<current-client>.local_link", agreement)
         self.assertIn("Do not request broader client permissions", agreement)
         self.assertIn("or retry automatically", agreement)
 
