@@ -1,12 +1,20 @@
 # ChatData
 
-**Good answers don’t reset. Free forever.**
+**Good AI answers don’t reset. Free forever.**
 
-ChatData gives Claude Code, Codex, and Cursor 16 data science skills for the work between “I have data” and “I trust this decision.” It helps one data scientist frame the question, choose a method, and run the analysis. It also asks the agent to challenge the conclusion and leave a local record another session can recheck.
+Your open-source data science workspace, ready to install. ChatData brings together 16 analysis skills, runnable Python checks, synthetic examples, and reusable record templates for Claude Code, Codex, and Cursor. It helps one person frame a question, run the analysis, challenge the conclusion, and save the evidence locally for the next session.
 
 It is MIT licensed and open source, with no trial, license key, or paid feature tier. The official download starts with a free personal account. After installation, you can link content-free usage reporting to see how many explicit ChatData workflows ran and what they may have saved based on your own baseline and hourly value. Your AI client, model usage, warehouse, and other tools may still cost money.
 
 [Install](#install) · [Try it on synthetic data](#first-run-get-one-useful-answer) · [Explore all 16 capabilities](docs/capabilities.md) · [Privacy](docs/privacy.md) · [Source](https://github.com/parasdoshicom/getchatdata)
+
+## How good answers carry forward
+
+You could assemble this yourself: write Markdown skill files, package them for each client, wire up Claude Code hooks, add calculation scripts, and design a record format for later sessions. ChatData brings those pieces together for one person.
+
+The skills ask your agent to save the question, metric definition, source, code, checked outputs, caveats, and conditions that would invalidate the answer in a local folder you choose. Keep that folder and point the next session at it. The agent can inspect the record, rerun the calculation, and recheck changed inputs before continuing.
+
+The files carry the context. Reuse depends on saving the record and following the workflow; installation alone does not make every chat remember everything. Claude Code hooks handle startup discovery and optional usage reporting. Codex and Cursor use their own skill setup. [Inspect the record template](plugins/chatdata/references/analysis-record.md) or [see the installed components](plugins/chatdata).
 
 ## What changes when ChatData is installed
 
