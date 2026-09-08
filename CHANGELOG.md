@@ -1,5 +1,9 @@
 # Changes
 
+## 1.6.5 — September 8, 2026
+
+- Round customer-facing dollar estimates to whole dollars in the Claude footer and status report. The underlying dashboard arithmetic stays unchanged.
+
 ## 1.6.4 — September 8, 2026
 
 - Refresh the local dashboard summary whenever ChatData syncs, even when no usage events are waiting. Claude Code can now replace a stale “set your time baseline” footer after the account already has an estimate.

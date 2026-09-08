@@ -100,7 +100,7 @@ class StatuslineTests(unittest.TestCase):
         output = self.run_statusline()
         self.assertEqual(
             output,
-            "ChatData · 1 completed workflow · 1.2h est. saved · $156.25 est. value",
+            "ChatData · 1 completed workflow · 1.2h est. saved · $156 est. value",
         )
         self.assertNotIn("prompt", output.lower())
 

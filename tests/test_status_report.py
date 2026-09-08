@@ -109,7 +109,7 @@ class StatusReportTests(unittest.TestCase):
         human = S.render(report)
         self.assertIn("Workflows started   2", human)
         self.assertIn("Completed workflows 1", human)
-        self.assertIn("0.5 hours · $87.5 (cached)", human)
+        self.assertIn("0.5 hours · $88 (cached)", human)
         self.assertIn("combine linked clients", human)
 
     def test_cached_counts_are_kept_when_estimates_are_not_configured(self):
