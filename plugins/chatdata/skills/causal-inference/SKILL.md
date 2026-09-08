@@ -18,3 +18,5 @@ Use negative controls, placebo dates/outcomes, sensitivity analysis, and alterna
 Deliver the estimand, identification assumptions, diagnostics, effect with justified uncertainty, threats, and what additional evidence would change the conclusion. When the design cannot support causation, provide a descriptive result and a feasible identification plan.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#causal-inference) when checking a plausible but unsupported answer.

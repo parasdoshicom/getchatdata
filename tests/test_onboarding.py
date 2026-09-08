@@ -14,7 +14,7 @@ class OnboardingTests(unittest.TestCase):
     def test_doctor_checks_bundled_examples(self):
         result = D.check_bundle()
         self.assertEqual(result['status'], 'passed')
-        self.assertEqual(len(result['checks']), 3)
+        self.assertEqual(len(result['checks']), 5)
         self.assertIn('not verified', result['scope'])
 
     def test_installed_doctor_works_from_an_unrelated_directory(self):

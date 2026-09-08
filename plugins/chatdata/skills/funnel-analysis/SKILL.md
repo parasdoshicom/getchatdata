@@ -18,3 +18,5 @@ Show entry-to-step and adjacent-step conversion, counts, losses, and time to con
 Deliver the funnel definition, excluded/unmatured counts, a step table, the highest-value diagnostic next query, and a rerunnable query or script. Mark causal explanations as hypotheses.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#funnel-analysis) when checking a plausible but unsupported answer.

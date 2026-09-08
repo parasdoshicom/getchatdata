@@ -18,3 +18,5 @@ Build the artifact with the user's available tools. Verify plotted values agains
 Deliver the chart or file, a short interpretation, source and refresh date, and any material limitation. Keep notebook rendering, export, or publication status explicit. Do not publish or upload private data without authorization.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#visualization) when checking a plausible but unsupported answer.

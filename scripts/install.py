@@ -31,6 +31,9 @@ def install(client, project, update=False):
             text=text.replace('name: '+name+'\n','name: chatdata-'+name+'\n',1)
             (dest/'SKILL.md').write_text(text)
             shutil.copytree(source/'references',dest/'references')
+            for reference in (dest/'references').rglob('*.md'):
+                text=reference.read_text().replace('../../references/','references/').replace('../../scripts/','scripts/')
+                reference.write_text(text)
             shutil.copytree(source/'scripts',dest/'scripts',ignore=shutil.ignore_patterns('__pycache__'))
             shutil.copytree(source/'examples',dest/'examples')
         target.mkdir(parents=True,exist_ok=True)

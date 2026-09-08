@@ -1,10 +1,20 @@
 # What has been checked
 
-The first release has 34 executable tests for the analytical helpers and packaging. Run them with `python3 -m unittest discover -s tests -v`. Tests cover known interval bounds, assignment mismatch, sparse and zero outcomes, practical effect thresholds, power, time ordering, maturity, duplicates, timezone handling, rate reconciliation, input errors, and installs that preserve existing skills.
+Run the executable suite with `python3 -m unittest discover -s tests -v`. It covers interval bounds, assignment mismatch, sparse and zero outcomes, practical effect thresholds, power, time ordering, cohort maturity, fixed retention denominators, join cardinality and measure reconciliation, duplicates, timezone handling, rate reconciliation, input errors, local privacy boundaries, and installs that preserve existing skills.
 
-`python3 scripts/validate.py` checks manifests, release versions, skill discovery files, local documentation links, and the absence of a mandatory hosted MCP configuration. The release also uses the native Claude and Codex manifest validators.
+`python3 scripts/validate.py` checks manifests, release versions, skill discovery files, local documentation links, and the absence of a mandatory hosted MCP configuration. Claude's native plugin validator also checks the Claude package. Codex 0.153.4 has no native `plugin validate` command, so Codex is checked through manifest consistency, a clean project install, skill discovery, and a live synthetic doctor run.
 
 These checks validate the shipped code and structure. They are not a comparative benchmark of AI reasoning or proof of a 10× productivity gain. Model output depends on the client, model, tools, context, and source data. We have not established that ChatData outperforms AI Analyst Lab, nao, or an unmodified client.
+
+## Measured enforcement check
+
+Run `python3 evals/run_enforcement_eval.py`. It plants five known defects in synthetic inputs and requires the deterministic helpers to catch them: uneven experiment assignment, out-of-order or immature funnel events, composition mistaken for within-segment decline, immature retention, and join measure inflation. The checked-in result records five passes in release 1.7.0.
+
+This result shows that the named code paths catch those exact fixtures. It does not measure how often an AI chooses the right skill, whether the model follows prose, real-world accuracy, or time saved.
+
+## Blinded model comparison
+
+The runnable [comparison harness](../evals/model-comparison/README.md) pairs fresh ChatData and unguided sessions on the eight cases below, randomizes the outputs, and keeps the condition key separate from the reviewer score sheet. It rejects incomplete scoring and reports paired wins after the reviewer has made every pass/fail judgment. No completed head-to-head score is published yet; publishing a number requires the full prompts, outputs, model and client versions, scoring notes, elapsed time, and provider-reported cost.
 
 ## Model review cases
 

@@ -18,3 +18,5 @@ Check interference, contamination, carryover, novelty, seasonality, instrumentat
 Deliver an experiment plan and a launch-readiness verdict with specific missing inputs. Running power calculations or offline simulations is allowed within the task. Launching an experiment, changing product traffic, spending money, or messaging participants requires the user's authorization.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#experiment-design) when checking a plausible but unsupported answer.

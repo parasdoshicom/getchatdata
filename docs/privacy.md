@@ -11,7 +11,7 @@ The short version: ChatData does not receive your datasets, prompts, conversatio
 The public package contains skill instructions, synthetic CSV examples, an installer, local analysis tools, a usage reporter, and a release update checker.
 
 - The project installer copies the 16 skill folders into the project path you provide. It does not change global client settings.
-- The setup doctor runs three calculations against bundled synthetic data. It makes no network requests and writes no files.
+- The setup doctor runs five calculations against bundled synthetic data. It makes no network requests and writes no files.
 - The analysis helper reads the input you name, runs the requested calculation, and prints JSON. When it reads a local CSV, it records that file's SHA-256 hash in the output. The hash supports reproducibility; the helper does not upload it.
 - At Claude Code startup, ChatData reads the installed version and prints discovery text. It also checks the latest public GitHub release at most once a day. The check sends no account token, prompt, dataset, path, or project information. It stores only a local release-check cache under `~/.chatdata/`. GitHub receives ordinary connection information, including the requesting IP address. Set `CHATDATA_UPDATE_CHECK=0` in Claude Code’s environment to disable checks. This check is independent of usage reporting.
 - A separate SessionStart usage hook attempts to flush already-consented metadata waiting in the local queue. It does nothing when reporting is not linked.

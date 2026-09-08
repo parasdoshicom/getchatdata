@@ -18,3 +18,5 @@ For each issue, record affected count and share, likely impact on the requested 
 Deliver a suitability verdict: usable, usable with named limitations, or blocked for this question. Keep raw data untouched. Put cleaned derivatives and rejected-row reports in the agreed output folder; record transformations.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#data-quality) when checking a plausible but unsupported answer.

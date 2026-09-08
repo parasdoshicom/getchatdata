@@ -93,7 +93,7 @@ Check the installed local helpers without asking the AI:
 python3 "/absolute/path/to/your-project/.cursor/skills/chatdata-data-science/scripts/doctor.py"
 ```
 
-It should report three passing synthetic checks. That proves the local helper installation works. Skill discovery and a real agent response are separate checks; the first-run workflow covers those.
+It should report five passing synthetic checks. That proves the local helper installation works. Skill discovery and a real agent response are separate checks; the first-run workflow covers those.
 
 ### Project-scoped Codex install
 
@@ -148,10 +148,12 @@ Start a fresh agent session after installation. Select `/chatdata:data-science` 
 You should get four concrete results:
 
 1. The setup doctor reports the installed ChatData version.
-2. Three synthetic checks pass:
+2. Five synthetic checks pass:
    - conversion falls from 17% to 8%, with the full 9 percentage-point decline explained by customer mix;
    - an ordered funnel contains 3 visits, 2 signups, and 1 purchase after an immature user and duplicate event are handled;
-   - an apparent experiment lift from 10% to 20% is withheld because assignment counts conflict with the planned allocation.
+   - an apparent experiment lift from 10% to 20% is withheld because assignment counts conflict with the planned allocation;
+   - a retention table keeps its denominator of two and leaves the unfinished cell unobserved;
+   - a joined revenue total of 70 is blocked because the order-grain total is 30.
 3. The agent explains the mix result without calling arithmetic attribution a causal explanation.
 4. A proposed local record contains the question, definition, exact command, source hash, result, checks, and caveats.
 
@@ -222,7 +224,7 @@ There are copyable prompts for all 16 skills in [docs/capabilities.md](docs/capa
 
 ## Built-in runnable checks
 
-ChatData includes five deterministic calculations. They are small enough to inspect and use only the Python standard library.
+ChatData includes seven deterministic analytical checks. They are small enough to inspect and use only the Python standard library.
 
 | Helper | What it does | What it refuses to hide |
 | --- | --- | --- |
@@ -231,10 +233,12 @@ ChatData includes five deterministic calculations. They are small enough to insp
 | Ordered funnel | Closed user-level conversion from timestamped events | Duplicates, out-of-order steps, future events, and immature windows |
 | Rate decomposition | Mix and within-segment contributions to a rate change | Non-reconciling totals, duplicate segments, and undefined segment rates |
 | CSV profile | Rows, columns, missing values, duplicate rows, and duplicate keys | The difference between structural checks and business validity |
+| Exact-period retention | Daily, weekly, or monthly cohort returns from complete cohort and activity extracts | Immature cells, moving denominators, duplicate activity, pre-entry activity, and ambiguous timestamps |
+| Join audit | Cardinality, matched and unmatched rows, exact output size, and optional measure reconciliation | Violated key relationships, many-to-many fanout, and repeated measures |
 
 See [the exact commands, inputs, outputs, formulas, and method sources](plugins/chatdata/references/tools.md).
 
-Other skills guide the client in using the Python, SQL, notebook, visualization, and authorized data tools already available in your environment. ChatData does not include a database connector, managed compute service, automatic experiment launcher, or model host.
+Other skills guide the client in using the Python, SQL, notebook, visualization, and authorized data tools already available in your environment. An optional local DuckDB adapter can run one bounded, read-only query against an existing database file; the core plugin remains dependency-free. ChatData does not include a managed warehouse connection, compute service, automatic experiment launcher, or model host.
 
 ## Keep useful work for the next session
 
@@ -324,7 +328,7 @@ Use `--client codex` for `.agents/skills/`. If Git reports local changes or a co
 
 ## Evidence and limits
 
-The release has package validation, unit tests for the helper calculations, installer rollback tests, local link checks, synthetic first-run cases, and recorded client verification. The [evaluation guide](docs/evaluation.md) separates deterministic software checks from the harder question of model behavior.
+The release has package validation, unit tests for the helper calculations, installer rollback tests, local link checks, synthetic first-run cases, and recorded client verification. The [evaluation guide](docs/evaluation.md) includes a runnable five-case enforcement benchmark and a blinded protocol for comparing fresh sessions with and without ChatData.
 
 These skills and checks improve the process an agent follows. They do not guarantee that a model will never make a mistake. They do not prove live data access, unattended operation, automatic memory, or superiority over another product. Inspect the evidence, run a relevant check, preserve the limits, and make the result reproducible.
 

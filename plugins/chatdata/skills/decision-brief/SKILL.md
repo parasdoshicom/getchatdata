@@ -18,3 +18,5 @@ Use everyday language. Remove claims that are only adjectives. Do not invent a q
 Deliver a brief with decision, evidence, limits, alternatives, and next action with an owner/deadline only when known. Link the local calculation and source record. Sending it to someone or publishing it is a separate action requiring authorization.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#decision-brief) when checking a plausible but unsupported answer.

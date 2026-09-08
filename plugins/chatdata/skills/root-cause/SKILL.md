@@ -18,3 +18,5 @@ For totals, distinguish volume, conversion, price, refunds, and recognition timi
 Try to disprove the leading explanation with a negative control, unchanged segment, independent source, or timing check. Observational contribution is not causation. Deliver the arithmetic bridge, ranked hypotheses, ruled-out explanations, uncertainty, and an action tied to the next test. If evidence only supports where the change occurred, say that.
 
 For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+
+Read the [worked failure case](../../references/worked-failures.md#root-cause) when checking a plausible but unsupported answer.

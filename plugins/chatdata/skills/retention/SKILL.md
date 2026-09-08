@@ -17,4 +17,8 @@ For time-to-churn with right censoring, use survival analysis with explicit even
 
 Deliver a cohort table with immature cells masked, a retention curve, denominator checks, and a decision about which cohort or lifecycle moment deserves investigation. Keep acquisition mix separate from within-cohort behavior.
 
-For helper commands and input formats, see [the runnable tools](../../references/tools.md) when needed. Resolve script paths relative to this skill: `../../scripts/analyze.py`.
+For exact calendar-period retention from CSV, run `../../scripts/retention.py` with separate complete cohort and qualifying activity files, an explicit `--as-of`, and `--timezone`. Follow [the retention helper contract](../../references/csv-retention.md). The helper rejects conflicting cohort entries, unknown entities, and activity before entry; deduplicates entity-period returns; preserves full cohort denominators; and masks unfinished periods. Do not replace these checks with an activity-only denominator or fill null cells with zero.
+
+The helper covers exact daily, Monday-weekly, and monthly retention. It does not validate source completeness or compute churn, rolling retention, survival, or revenue retention. Use a separately justified method for those questions. For other helper commands, see [the runnable tools](../../references/tools.md).
+
+Read the [worked failure case](../../references/worked-failures.md#retention) when checking a plausible but unsupported answer.

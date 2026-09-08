@@ -136,6 +136,9 @@ class PackagingTests(unittest.TestCase):
                 self.assertTrue((target/'scripts/analyze.py').is_file())
                 text=(target/'SKILL.md').read_text(); self.assertIn('name: chatdata-experiment-analysis',text)
                 self.assertNotIn('../../references/',text)
+                retention=Path(tmp)/folder/'skills/chatdata-retention'
+                self.assertNotIn('../../scripts/',(retention/'references/csv-retention.md').read_text())
+                self.assertIn('python3 scripts/retention.py',(retention/'references/csv-retention.md').read_text())
                 with self.assertRaises(ValueError): I.install(client,tmp)
                 self.assertEqual((existing/'keep').read_text(),'preserve')
     def test_hook_has_branding_and_no_settings_mutation(self):
